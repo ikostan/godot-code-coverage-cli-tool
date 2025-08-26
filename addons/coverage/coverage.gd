@@ -526,8 +526,8 @@ func script_coverage(verbosity := 0):
 				multiline = true
 	result.append(
 		(
-			"%s%.1f%% Total Coverage: %s/%s lines"
-			% [pass_fail, coverage_percent, coverage_count(), coverage_line_count()]
+			"%s%.1f%% Total Coverage: %s/%s lines. Target was %.1f%%"
+			% [pass_fail, coverage_percent, coverage_count(), coverage_line_count(), _coverage_target_total]
 		)
 	)
 
