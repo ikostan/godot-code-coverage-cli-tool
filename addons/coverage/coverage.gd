@@ -26,12 +26,13 @@ static var instance: Coverage
 class ScriptCoverage:
 	extends RefCounted
 
+	var lock := Mutex.new()
 	var coverage_lines := {}
-	# coverage_queue.append() is so far the fastest way to instrument code
-	# coverage_queue.append(line_number) seems faster than coverage_lines[i] += 1
-	var coverage_queue := []
 	var script_path := ""
 	var source_code := ""
+	# coverage_queue.append() is so far the fastest way to instrument code
+	# coverage_queue.append(line_number) seems faster than coverage_lines[i] += 1
+	var _coverage_queues: Dictionary[int, PackedInt32Array]
 
 	func _init(_script_path: String, _load_source_code = false) -> void:
 		script_path = _script_path
@@ -40,8 +41,15 @@ class ScriptCoverage:
 		source_code = f.get_as_text()
 		f.close()
 
+	func get_coverage_queue() -> PackedInt32Array:
+		var thread_id := OS.get_thread_caller_id()
+		lock.lock()
+		var result := _coverage_queues.get_or_add(thread_id, PackedInt32Array())
+		lock.unlock()
+		return result
+
 	func coverage_count() -> int:
-		process_queue()
+		process_queues()
 		var count := 0
 		for line in coverage_lines:
 			if coverage_lines[line] > 0:
@@ -49,11 +57,11 @@ class ScriptCoverage:
 		return count
 
 	func coverage_line_count() -> int:
-		process_queue()
+		process_queues()
 		return len(coverage_lines)
 
 	func coverage_percent() -> float:
-		process_queue()
+		process_queues()
 		var clc = coverage_line_count()
 		return (float(coverage_count()) / float(clc)) * 100.0 if clc > 0 else 100.0
 
@@ -63,7 +71,7 @@ class ScriptCoverage:
 		coverage_lines[line_number] = coverage_lines[line_number] + count
 
 	func get_coverage_json() -> Dictionary:
-		process_queue()
+		process_queues()
 		return coverage_lines.duplicate()
 
 	func merge_coverage_json(coverage_json: Dictionary) -> void:
@@ -106,25 +114,38 @@ class ScriptCoverage:
 
 	# only process the queue if it got too big
 	func maybe_process_queue():
-		if len(coverage_queue) > MAX_QUEUE_SIZE:
-			process_queue()
+		var queues: Array[PackedInt32Array]
+		lock.lock()
+		for queue in _coverage_queues.values():
+			if len(queue) > MAX_QUEUE_SIZE:
+				queues.append(queue)
+		lock.unlock()
+		for queue in queues:
+			process_queue(queue)
 
-	func process_queue():
-		for line in coverage_queue:
+	func process_queues():
+		lock.lock()
+		var queues = _coverage_queues.values()
+		lock.unlock()
+		for queue in queues:
+			process_queue(queue)
+
+	func process_queue(queue: PackedInt32Array):
+		lock.lock()
+		for line in queue:
 			add_line_coverage(line)
-		coverage_queue = []
+		queue.clear()
+		lock.unlock()
+
 
 class BlockCounter:
-	var blocks :=  {"{}": 0, "()": 0, "[]": 0}
+	var blocks := {"{}": 0, "()": 0, "[]": 0}
 	var lambda: BlockCounter = null
 
 	func _line_ends_with_lambda(line: String) -> bool:
 		if line.ends_with("):"):
 			var paren_count = 0
-			var map := {
-				"(": -1,
-				")": 1
-			}
+			var map := {"(": -1, ")": 1}
 			for i in range(len(line) - 2, 4, -1):
 				paren_count += map.get(line[i], 0)
 				if paren_count == 0:
@@ -133,7 +154,7 @@ class BlockCounter:
 
 	func _erase_string_literals(line: String) -> String:
 		# Ignoring multiline strings here .. probably need to deal with them at some point
-		var dq = "\""
+		var dq = '"'
 		var sq = "'"
 		var quote = ""
 		var escaped := false
@@ -183,7 +204,6 @@ class BlockCounter:
 			var lr = lambda.get_total()
 			if lr >= 0:
 				return lr
-			pass
 		var result := 0
 		for key in blocks:
 			result += blocks[key]
@@ -194,12 +214,15 @@ class BlockCounter:
 			return "%s l%s" % [blocks, lambda]
 		return str(blocks)
 
+
 class ScriptCoverageCollector:
 	extends ScriptCoverage
 
-	var DEBUG_SCRIPT_COVERAGE := false
 	const ERR_MAP := {43: "PARSE_ERROR"}
 	const LAMBDA_BLOCK = "func():"
+
+	# gdlint: ignore=class-variable-name
+	var DEBUG_SCRIPT_COVERAGE := false
 
 	var instrumented_source_code := ""
 	var covered_script: Script
@@ -403,7 +426,7 @@ class ScriptCoverageCollector:
 					write_var = false
 					out_lines.append(
 						(
-							"%svar %s = %s.coverage_queue"
+							"%svar %s = %s.get_coverage_queue()"
 							% [
 								leading_whitespace,
 								collector_var,
@@ -417,7 +440,9 @@ class ScriptCoverageCollector:
 					comment += "%s %s" % [block_count, block]
 				comment = " # " + comment if comment else ""
 				coverage_lines[i] = 0
-				out_lines.append("%s%s.append(%s)%s" % [leading_whitespace, collector_var, i, comment])
+				out_lines.append(
+					"%s%s.append(%s)%s" % [leading_whitespace, collector_var, i, comment]
+				)
 			elif DEBUG_SCRIPT_COVERAGE:
 				out_lines.append("%s\t# skip: %s state: %s" % [leading_whitespace, skip, state])
 			out_lines.append(line)
@@ -429,7 +454,10 @@ class ScriptCoverageCollector:
 class NullCoverage:
 	extends Coverage
 
-	var coverage_queue = []
+	var _queue: PackedInt32Array
+
+	func get_coverage_queue() -> PackedInt32Array:
+		return _queue
 
 	func get_coverage_collector(_script_name: String):
 		return self
@@ -462,7 +490,7 @@ func _finalize(print_verbosity := 0):
 	print(script_coverage(print_verbosity))
 
 
-func get_coverage_collector(script_name: String):
+func get_coverage_collector(script_name: String) -> ScriptCoverageCollector:
 	var result = coverage_collectors[script_name] if script_name in coverage_collectors else null
 	if result:
 		result.maybe_process_queue()
