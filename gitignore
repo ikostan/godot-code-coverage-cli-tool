@@ -1,0 +1,9 @@
+/addons/gut
+/coverage1.json
+/coverage2.json
+/coverage_out.json
+/.godot
+/.idea
+/.venv
+/.py_venv
+project_structure.txt
