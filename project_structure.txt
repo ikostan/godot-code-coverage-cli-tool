@@ -22,6 +22,7 @@ godot-code-coverage-cli-tool/
     other_node.gd
     other_node.gd.uid
     project.godot
+    project_structure.txt
     Readme.md
     spatial.gd
     spatial.gd.uid
@@ -1087,8 +1088,6 @@ godot-code-coverage-cli-tool/
         instrumentation-contract-v1.2.md
         seed-corpus-specification-v1.4.md
     tests/
-        test_coverage.gd
-        test_coverage.gd.uid
     workspace/
         run_gdlint.sh
         run_markdown_lint.sh
