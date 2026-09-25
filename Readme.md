@@ -13,15 +13,15 @@ The legacy tool worked by instrumenting scripts at runtime: a `Coverage` singlet
 This project is moving to a different model: a **pure function** that takes GDScript source text in, and returns instrumented source text (or an explicit error) out — with zero dependency on `SceneTree`, autoloads, test runners, or any runtime coverage state. It can be run standalone from the command line against any `.gd` file, independent of whether a Godot project is even running. Ultimately, this enables seamless CI/CD integration (e.g., GitHub Actions, Codecov) to generate standard LCOV/HTML reports for pull request checks.
 
 ### Core Design Principles
-- **Pure Function Architecture**: Zero runtime dependencies for the static instrumentation phase[cite: 1].
-- **Fail-Closed**: The instrumentor refuses to transform code it cannot definitively prove is safe, rather than guessing or producing plausible but incorrect coverage[cite: 1].
-- **LCOV-Canonical**: Built from the ground up to output standard data shapes.
-- **Original-Line Coordinates**: All coverage reporting maps strictly back to the original source line numbers[cite: 1].
+- **Pure Function**: The instrumentor has zero dependency on SceneTree, autoloads, test runners, or any runtime coverage state.
+- **Fail-Closed**: The instrumentor refuses to transform code it cannot definitively prove is safe, rather than guessing or producing plausible but incorrect coverage.
+- **LCOV-Canonical**: Built from the ground up to emit standard LCOV.
+- **Original-Line Coordinates**: All coverage reporting maps strictly back to the original source line numbers.
 
 The full behavioral contract for this instrumentor is specified in:
 
-- **[`docs/instrumentation-contract-v1.2.md`](docs/instrumentation-contract-v1.2.md)** — the frozen interface: input/output shapes, per-line classification rules (`executable` / `non_executable` / `structural`), determinism guarantees, and the fail-closed principle[cite: 1].
-- **[`docs/seed-corpus-specification-v1.4.md`](docs/seed-corpus-specification-v1.4.md)** — the golden-test corpus used to validate the instrumentor against the contract, serving as the strict acceptance test suite for Phase 1[cite: 2].
+- **[`docs/instrumentation-contract-v1.2.md`](docs/instrumentation-contract-v1.2.md)** — the frozen interface: input/output shapes, per-line classification rules (`executable` / `non_executable` / `structural`), determinism guarantees, and the fail-closed principle.
+- **[`docs/seed-corpus-specification-v1.4.md`](docs/seed-corpus-specification-v1.4.md)** — the golden-test corpus used to validate the instrumentor against the contract, serving as the strict acceptance test suite for Phase 1.
 
 ## Future Usage (Mockup)
 
@@ -56,7 +56,7 @@ The Instrumentation Contract v1.2 and Seed Corpus Specification v1.4 are locked 
 
 **Current focus:** materializing the seed corpus and implementing the pure Analyzer + Transformer against it.
 
-A handful of legacy demo `.gd` files remain at the project root. **These are not usage examples.** They are retained temporarily as raw syntax material for expanding the seed corpus and will be removed once Phase 1 is complete.
+A few legacy demo `.gd` files remain at the project root. They are **not** usage examples — they are temporary syntax material for the seed corpus and will be removed after Phase 1.
 
 ## Contributing / following along
 
@@ -64,4 +64,4 @@ Since the instrumentor itself is still being built, the most useful things to re
 
 ## License
 
-See [LICENSE](https://www.google.com/search?q=./LICENSE&utm_source=gemini).
+See [LICENSE](https://www.google.com/search?q=LICENSE&utm_source=gemini).
