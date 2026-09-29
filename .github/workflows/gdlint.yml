@@ -25,6 +25,9 @@ jobs:
           python-version: "3.x"
 
       - name: "Cache PIP Dependencies"
+        # check.sh bootstraps its own gdtoolkit install into a local .py_venv
+        # (see below) -- this cache still helps because that install still
+        # goes through pip, which reads from ~/.cache/pip when warm.
         uses: "actions/cache@v6"
         with:
           path: "~/.cache/pip"
@@ -32,18 +35,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: "Install GDToolkit (for gdlint & gdformat)"
-        # Installs gdtoolkit==4.* for Godot 4.x
-        # uses: "Scony/godot-gdscript-toolkit@master"
-        run: |
-          pip install "gdtoolkit==4.*"
+      # NOTE: no separate "Install GDToolkit" step here. check.sh installs
+      # gdtoolkit itself into a local .py_venv on first run (see check.sh),
+      # so a standalone global `pip install gdtoolkit` here would only
+      # install a copy that check.sh's own venv never uses -- redundant work
+      # for no effect.
 
       - name: "Check Formatting"
-        # Scans all .gd files; use --diff for detailed output
+        # Runs via check.sh so .gdcheckignore exclusions (tests/corpus/*.gd,
+        # other.gd -- see check.sh + .gdcheckignore) are actually honored.
+        # Calling gdformat directly on a path bypasses .gdcheckignore
+        # entirely, since only check.sh's `find ... -prune` logic reads it.
         run: |
-          gdformat --diff --check ./tests
+          bash check.sh --format
 
       - name: "Lint Code"
-        # Runs static analysis; fails if issues found
+        # Same reasoning as above: routed through check.sh so the ignore
+        # list applies here too, not just to formatting.
         run: |
-          gdlint ./tests
+          bash check.sh --lint

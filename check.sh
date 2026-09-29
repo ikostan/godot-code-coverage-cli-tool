@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 exempt=()
-[ -f $dir/.gdcheckignore ] && IFS=$'\n' read -d '' -r -a exempt <<< "$( grep -Ev '^#' $dir/.gdcheckignore )" || true
+# was: grep -Ev '^#' -- that strips comment lines but leaves blank lines,
+# which then become a spurious empty "-path ./" clause in prune_flags below.
+[ -f $dir/.gdcheckignore ] && IFS=$'\n' read -d '' -r -a exempt <<< "$( grep -Ev '^#|^$' $dir/.gdcheckignore )" || true
 
 lint=1
 format=1
 fix=0
+# Initialized here (was previously unset until their respective blocks ran).
+# Under `set -u` (still active after `set +e` below, which only disables
+# errexit, not nounset), calling this script with only --lint or only
+# --format left the *other* result variable unset, and the final
+# `if [ $lint_result != 0 ]` / `if [ $format_result != 0 ]` checks would
+# then abort with "unbound variable" -- unconditionally failing the step
+# regardless of whether gdlint/gdformat actually passed. Initializing both
+# to 0 means "didn't run, so don't count as failed."
+lint_result=0
+format_result=0
 
 set -eu
 
