@@ -1,5 +1,4 @@
-## res://tests/corpus/basic_statements.gd
-
+# basic_statements.gd
 extends Node
 
 var bare: int
