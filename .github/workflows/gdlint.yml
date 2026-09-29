@@ -41,9 +41,9 @@ jobs:
       - name: "Check Formatting"
         # Scans all .gd files; use --diff for detailed output
         run: |
-          gdformat --diff --check ./scripts
+          gdformat --diff --check ./tests
 
       - name: "Lint Code"
         # Runs static analysis; fails if issues found
         run: |
-          gdlint ./scripts
+          gdlint ./tests
