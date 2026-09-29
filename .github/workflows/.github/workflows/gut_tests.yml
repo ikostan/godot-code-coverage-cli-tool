@@ -1,0 +1,66 @@
+---
+name: "GUT Tests"
+
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+    inputs:
+      godot_version:
+        type: "string"
+        default: "4.7.1-stable"
+      godot_sha256:
+        type: "string"
+        default: "c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba"
+
+env:
+  # Pin this to the exact Godot version this project targets.
+  # Must include major.minor.patch (a pre-release label is optional).
+  GODOT_VERSION: "4.7.1"
+
+jobs:
+  gut-tests:
+    name: "Run GUT tests"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          # contrib/Gut is a git submodule and is the source for addons/gut
+          submodules: recursive
+
+      - name: "Setup Godot"
+        uses: "chickensoft-games/setup-godot@v1"
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          include-templates: false
+
+      - name: "Verify Godot version"
+        run: godot --version
+
+      - name: "Install GUT addon from submodule"
+        run: bash update_addons.sh --no-init
+
+      - name: "Warm up asset import cache"
+        # First headless run can otherwise in"terleave import work with test
+        # output and occasionally produce a flaky first pass. Failures here
+        # are not fatal - the real signal is the test run below.
+        run: godot --headless --path . --import || true
+
+      - name: "Run GUT tests"
+        run: >
+          godot --headless -d --path .
+          -s addons/gut/gut_cmdln.gd
+          -gdir=res://tests
+          -ginclude_subdirs
+          -gexit
+          -gexit_on_success
+          -glog=3
+          -gjunit_xml_file=res://test_results.xml
+
+      - name: "Upload JUnit test results"
+        if: always()
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "gut-test-results"
+          path: "test_results.xml"
+          if-no-files-found: warn
