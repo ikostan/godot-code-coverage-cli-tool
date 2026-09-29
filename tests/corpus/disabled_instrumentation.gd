@@ -1,5 +1,3 @@
-## res://tests/corpus/disabled_instrumentation.gd
-
 extends Node
 
 var bare: int

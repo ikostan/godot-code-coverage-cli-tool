@@ -1,5 +1,3 @@
-## res://tests/corpus/control_flow.gd
-
 extends Node
 
 
