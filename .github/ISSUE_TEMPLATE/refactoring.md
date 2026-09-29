@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟪 Refactoring"
 about: "Internal structural improvements without altering external contract behavior"
@@ -22,3 +23,5 @@ assignees: ikostan
 - [ ] No changes to the public `InstrumentationResult` or `InstrumentationError` interfaces.
 - [ ] The seed corpus pipelines still pass **100%** after these changes.
 - [ ] Zero runtime dependencies were accidentally introduced.
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->

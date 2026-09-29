@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟨 Test Implementation"
 about: "Adding to the seed corpus or modifying the runtime verification harness"
@@ -20,3 +21,5 @@ assignees: ikostan
 - [ ] `expected.instrumented.gd` (if applicable) matches exact substitution rules.
 - [ ] `expected_hits.json` (if applicable) drafted for runtime verification.
 - [ ] Added to the overall verification runner suite.
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->

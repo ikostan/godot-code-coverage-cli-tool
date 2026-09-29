@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟩 Task"
 about: "Implementation of a specific feature, method, or structural component"
@@ -24,3 +25,5 @@ assignees: ikostan
 - **Parent Epic:** #
 - **Blocks:** #
 - **Blocked By:** #
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->

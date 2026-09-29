@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟦 Epic"
 about: "Major architectural phase, milestone, or feature set"
@@ -34,3 +35,5 @@ assignees: ikostan
 
 **Technical Risks:** <!-- Mention any technical blockers or dependencies here. -->
 **Pipeline Scenarios:** <!-- Define how this behaves in success or expected-failure pipelines. -->
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
