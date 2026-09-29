@@ -17,7 +17,7 @@ This document defines the deterministic interface and behavioral guarantees of t
 
 The instrumentor is a pure function that accepts:
 
-```
+```text
 (original_source, script_path, configuration)
 ```
 
@@ -103,7 +103,7 @@ This is a **template string** that the instrumentor substitutes before insertion
 
 Example values:
 
-```
+```text
 __coverage_hit({line})
 CoverageCollector.record("{path}", {line})
 ```
@@ -135,7 +135,7 @@ Every original source line receives **exactly one** of the following classificat
 
 For every `executable` line selected for instrumentation:
 
-```
+```text
 original executable statement
         ↓
 hit recorder insertion
@@ -171,7 +171,7 @@ var hit_record_inserted: bool
 
 Primary mapping direction:
 
-```
+```text
 original line → zero or more instrumented lines
 ```
 
@@ -284,7 +284,7 @@ Textual similarity is not required; semantic equivalence for supported construct
 
 #### 12.1 Success pipeline (default)
 
-```
+```text
 original source
       ↓
 instrument → must return InstrumentationResult
@@ -300,7 +300,7 @@ compare against expected executable lines / hit counts
 
 #### 12.2 Expected-failure pipeline
 
-```
+```text
 original source
       ↓
 instrument → must return InstrumentationError
