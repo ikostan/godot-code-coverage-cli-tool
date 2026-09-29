@@ -38,10 +38,6 @@ jobs:
       CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}"
   release_drafter:
     name: "Release Drafter"
-    needs:
-      - "codeql"
-      - "snyk"
-      - "trivy"
     uses: "./.github/workflows/release_drafter.yml"
     secrets:
       AUTH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
