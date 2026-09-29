@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟥 Bug Report"
 about: "Parsing failures, incorrect text substitution, or fail-closed violations"
@@ -6,6 +5,8 @@ title: "[BUG] "
 labels: bug
 assignees: ikostan
 ---
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 ### 💥 Issue Description
 

@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟩 Task"
 about: "Implementation of a specific feature, method, or structural component"
@@ -6,6 +5,8 @@ title: "[TASK] "
 labels: task
 assignees: ikostan
 ---
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 ### 📝 Technical Context
 <!-- Briefly explain what needs to be built and why. Provide relevant context from the parent Epic. -->

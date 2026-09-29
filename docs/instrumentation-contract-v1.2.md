@@ -1,4 +1,7 @@
-**Instrumentation Contract v1.2**
+# Instrumentation Contract v1.2
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
+
 *(Godot 4.x CLI Code Coverage Tool – Pure Source Instrumentor)*
 
 **Status**: Fully Implementation-Locked
@@ -93,7 +96,7 @@ Controls whether lines classified as `non_executable` appear in the `line_mappin
 This is a **template string** that the instrumentor substitutes before insertion. Supported placeholders (case-sensitive):
 
 | Placeholder | Replaced with                          |
-|-------------|-----------------------------------------|
+|-------------|----------------------------------------|
 | `{line}`    | Original 1-based line number (integer) |
 | `{path}`    | The `script_path` value (string)       |
 
@@ -117,11 +120,11 @@ CoverageCollector.record("{path}", {line})
 
 Every original source line receives **exactly one** of the following classifications:
 
-| Classification     | Meaning |
-|---------------------|---------|
-| `executable`       | Represents independently executable GDScript behaviour that can legitimately receive a line-hit record. |
-| `non_executable`   | Does not represent independently executable behaviour. |
-| `structural`       | Required for syntactic structure but is not itself an independently coverable statement. |
+| Classification   | Meaning                                                                                                 |
+|------------------|---------------------------------------------------------------------------------------------------------|
+| `executable`     | Represents independently executable GDScript behaviour that can legitimately receive a line-hit record. |
+| `non_executable` | Does not represent independently executable behaviour.                                                  |
+| `structural`     | Required for syntactic structure but is not itself an independently coverable statement.                |
 
 > `structural` does **not** mean "uncovered". It means the line itself is not assigned a normal line-hit obligation.
 
@@ -250,9 +253,9 @@ The instrumentor treats the source as a sequence of lines split on `\n`. A trail
 
 ### 10. Error vs Skip Semantics
 
-| Concept | Meaning |
-|---------|---------|
-| **Skip** | The construct is understood and intentionally receives no hit recorder. Represented in `skipped_lines`. |
+| Concept   | Meaning                                                                                                                                         |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Skip**  | The construct is understood and intentionally receives no hit recorder. Represented in `skipped_lines`.                                         |
 | **Error** | The instrumentor cannot prove that transformation is safe/correct. Returns `InstrumentationError`; no usable `instrumented_source` is produced. |
 
 ---
@@ -312,20 +315,20 @@ done
 
 #### 13.1 Success entries
 
-| Artifact                    | Purpose |
-|------------------------------|---------|
-| `source.gd`                 | Original source |
-| `expected.instrumented.gd`  | Deterministic golden instrumented source |
-| `expected.metadata.json`    | Classification, mappings, executable lines, skipped lines |
-| `expected_hits.json`        | Runtime hit expectations |
-| `exercise.gd`               | Script that exercises the known paths |
+| Artifact                   | Purpose                                                   |
+|----------------------------|-----------------------------------------------------------|
+| `source.gd`                | Original source                                           |
+| `expected.instrumented.gd` | Deterministic golden instrumented source                  |
+| `expected.metadata.json`   | Classification, mappings, executable lines, skipped lines |
+| `expected_hits.json`       | Runtime hit expectations                                  |
+| `exercise.gd`              | Script that exercises the known paths                     |
 
 #### 13.2 Expected-failure entries
 
-| Artifact                    | Purpose |
-|------------------------------|---------|
-| `source.gd`                 | Original source |
-| `expected.error.json`       | Expected `InstrumentationStatus`, `original_line`, `reason` |
+| Artifact              | Purpose                                                     |
+|-----------------------|-------------------------------------------------------------|
+| `source.gd`           | Original source                                             |
+| `expected.error.json` | Expected `InstrumentationStatus`, `original_line`, `reason` |
 
 ---
 
@@ -346,3 +349,5 @@ This principle is non-negotiable.
 ---
 
 **End of Instrumentation Contract v1.2**
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->

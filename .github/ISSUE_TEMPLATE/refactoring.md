@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟪 Refactoring"
 about: "Internal structural improvements without altering external contract behavior"
@@ -6,6 +5,8 @@ title: "[REFACTOR] "
 labels: refactoring
 assignees: ikostan
 ---
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 ### 🧹 Current Implementation
 <!-- What does the code look like now, and what are its pain points? (e.g., High cyclomatic complexity, tight coupling). -->

@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟦 Epic"
 about: "Major architectural phase, milestone, or feature set"
@@ -6,6 +5,8 @@ title: "[EPIC] "
 labels: epic
 assignees: ikostan
 ---
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 ### 🎯 Strategic Objective
 

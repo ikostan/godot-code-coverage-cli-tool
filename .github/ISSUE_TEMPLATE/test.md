@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 ---
 name: "🟨 Test Implementation"
 about: "Adding to the seed corpus or modifying the runtime verification harness"
@@ -6,6 +5,8 @@ title: "[TEST] "
 labels: test
 assignees: ikostan
 ---
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 ### 🧪 Test Scope & Justification
 <!-- What specific GDScript syntax or edge case are we trying to capture? (e.g., Match statement, nested lambda bracket continuation). -->

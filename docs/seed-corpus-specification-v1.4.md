@@ -1,4 +1,7 @@
-**Seed Corpus Specification v1.4**
+# Seed Corpus Specification v1.4
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
+
 *(Final – ready for materialization)*
 
 Both issues from v1.3 are corrected: line numbers have been re-counted against the literal source blocks, and Sub-case A now uses a construct that genuinely defeats a line-oriented stateful analyzer, with the failure mechanism named explicitly.
@@ -450,3 +453,5 @@ Any valid source, but with an empty or unknown-placeholder `hit_recorder_express
 - All sources and goldens use Unix line endings only.
 
 The corpus is now fully determined and free of the previously identified arithmetic and justification errors. Ready to materialize the directory structure and concrete skeleton files under `tests/corpus/`.
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
