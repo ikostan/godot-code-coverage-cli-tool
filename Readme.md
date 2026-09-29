@@ -1,5 +1,5 @@
 # Godot Code Coverage CLI Tool
-<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
+<!-- markdownlint-disable MD001 MD013 MD036 MD033 table-column-style -->
 
 ![Godot 4.x](https://img.shields.io/badge/Godot-4.x-blue?style=flat-square&logo=godotengine)
 ![Status: WIP](https://img.shields.io/badge/Status-WIP-orange?style=flat-square)
@@ -40,7 +40,6 @@ godot --headless -s addons/coverage/cli.gd run-tests --export-lcov=coverage.info
 ```
 
 ## Status & Roadmap
-<!-- markdownlint-disable MD001 MD013 MD036 MD033 table-column-style -->
 
 **Work in progress — the pure-source instrumentor is not yet implemented.**
 

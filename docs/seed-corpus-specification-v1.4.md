@@ -4,7 +4,10 @@
 
 *(Final – ready for materialization)*
 
-Both issues from v1.3 are corrected: line numbers have been re-counted against the literal source blocks, and Sub-case A now uses a construct that genuinely defeats a line-oriented stateful analyzer, with the failure mechanism named explicitly.
+Both issues from v1.3 are corrected: line numbers have been re-counted against 
+the literal source blocks, and Sub-case A now uses a construct that genuinely 
+defeats a line-oriented stateful analyzer, with the failure mechanism named 
+explicitly.
 
 ### Common conventions
 
