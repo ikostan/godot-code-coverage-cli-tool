@@ -27,6 +27,13 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: "read"
+      # Required for dorny/paths-filter to call the GitHub REST API (see the
+      # "token" input below). Job-level permissions REPLACE the workflow-level
+      # grant above rather than adding to it, so this must be repeated here --
+      # without it the API call is denied and the action silently falls back
+      # to a two-commit git diff that only covers the latest push, not the
+      # whole PR. See the "token" comment below for the failure mode this fixes.
+      pull-requests: "read"
     outputs:
       gdscript: "${{ steps.filter.outputs.gdscript }}"
       python_tests: "${{ steps.filter.outputs.python_tests }}"
@@ -48,10 +55,10 @@ jobs:
       - name: "Checkout Code"
         uses: "actions/checkout@v7.0.1"
         with:
-          # Full history: on a batched push (multiple commits at once, rebase, force-push)
-          # github.event.before may point further back than a shallow clone can see,
-          # which breaks the paths-filter diff below. fetch-depth: 0 removes that risk
-          # entirely at the cost of a slower checkout on this one job.
+          # Full history: needed so paths-filter's git-diff fallback (used
+          # for non-pull_request events, or if the API call above is ever
+          # unavailable) can find a common ancestor rather than failing on a
+          # shallow clone.
           fetch-depth: 0
       - name: "Filter Paths"
         # Pinned to a full commit SHA per security review: the @v3 tag is a mutable
@@ -64,16 +71,27 @@ jobs:
         uses: "dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36"  # v3.0.2
         id: "filter"
         with:
-          token: ""
-          # On subsequent pushes, compare against the last commit. On initial PR open, fall back to the base branch.
-          # NOTE: on a `synchronize` event this diffs only the latest push, not
-          # the full PR -- a push that touches only workflow YAML will not
-          # mark gdscript/markdown true even if earlier commits in the same
-          # PR did. This is intentional (saves CI minutes on incremental
-          # pushes) but means "nothing ran" on a given push does not imply
-          # "nothing ran for this PR" -- check earlier runs in the PR's
-          # Checks tab too.
-          base: "${{ github.event.before == '0000000000000000000000000000000000000000' && github.event.pull_request.base.sha || github.event.before }}"
+          # IMPORTANT: was token: "" (empty). An empty token disables the
+          # GitHub API path entirely, and on this pinned version that also
+          # makes the action ignore `base` unconditionally on pull_request
+          # events -- it falls back to diffing only the two most recently
+          # fetched commits, so only the latest push's files are detected,
+          # not the full PR. Confirmed via the "Github token is not
+          # available - changes will be detected using git diff" log line
+          # and a run that found only 1 changed file despite earlier commits
+          # in the same PR touching dozens of files.
+          #
+          # Supplying the token switches to the GitHub REST API, which
+          # correctly diffs the full PR against its true base branch
+          # regardless of how many commits/pushes it contains. This makes
+          # `base` (below) a no-op for pull_request events -- kept only in
+          # case this workflow is ever also triggered by push/other events.
+          token: "${{ github.token }}"
+          base: >-
+            ${{ github.event.before ==
+            '0000000000000000000000000000000000000000' &&
+            github.event.pull_request.base.sha ||
+            github.event.before }}
           filters: |
             gdscript:
               - '**/*.gd'

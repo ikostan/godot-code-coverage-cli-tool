@@ -25,26 +25,26 @@ jobs:
         uses: "actions/checkout@v4"
         with:
           # contrib/Gut is a git submodule and is the source for addons/gut
-          submodules: recursive
+          submodules: "recursive"
 
       - name: "Setup Godot"
         uses: "chickensoft-games/setup-godot@v1"
         with:
-          version: ${{ env.GODOT_VERSION }}
+          version: "${{ env.GODOT_VERSION }}"
           use-dotnet: false
           include-templates: false
 
       - name: "Verify Godot version"
-        run: godot --version
+        run: "godot --version"
 
       - name: "Install GUT addon from submodule"
-        run: bash update_addons.sh --no-init
+        run: "bash update_addons.sh --no-init"
 
       - name: "Warm up asset import cache"
-        # First headless run can otherwise in"terleave import work with test
+        # First headless run can otherwise interleave import work with test
         # output and occasionally produce a flaky first pass. Failures here
         # are not fatal - the real signal is the test run below.
-        run: godot --headless --path . --import || true
+        run: "godot --headless --path . --import || true"
 
       - name: "Run GUT tests"
         run: >
@@ -58,9 +58,9 @@ jobs:
           -gjunit_xml_file=res://test_results.xml
 
       - name: "Upload JUnit test results"
-        if: always()
+        if: "always()"
         uses: "actions/upload-artifact@v4"
         with:
           name: "gut-test-results"
           path: "test_results.xml"
-          if-no-files-found: warn
+          if-no-files-found: "warn"
