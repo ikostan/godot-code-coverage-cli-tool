@@ -1,4 +1,5 @@
 # Add Godot coverage corpus fixtures
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 This change adds a corpus of sample GDScript files for coverage 
 testing, covering autoloads, coroutine awaits, control flow, 
@@ -29,3 +30,5 @@ validation.
 | https://github.com/ikostan/godot-code-coverage-cli-tool/issues/3 | Create the tests/corpus/ directory and add the 11 required locked GDScript source files with the specified filenames. | ✅        |             |
 | https://github.com/ikostan/godot-code-coverage-cli-tool/issues/3 | Ensure the contents of all 11 corpus files match Seed Corpus Specification v1.4.                                      | ✅        |             |
 | https://github.com/ikostan/godot-code-coverage-cli-tool/issues/3 | Ensure every corpus source file uses strict Unix line endings.                                                        | ✅        |             |
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
