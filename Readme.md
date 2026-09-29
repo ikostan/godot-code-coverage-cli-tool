@@ -40,7 +40,7 @@ godot --headless -s addons/coverage/cli.gd run-tests --export-lcov=coverage.info
 ```
 
 ## Status & Roadmap
-<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
+<!-- markdownlint-disable MD001 MD013 MD036 MD033 table-column-style -->
 
 **Work in progress — the pure-source instrumentor is not yet implemented.**
 
@@ -68,4 +68,4 @@ Since the instrumentor itself is still being built, the most useful things to re
 
 See [LICENSE](https://www.google.com/search?q=LICENSE&utm_source=gemini).
 
-<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
+<!-- markdownlint-enable MD001 MD013 MD036 MD033 table-column-style -->
