@@ -6,9 +6,11 @@ concurrency:
   group: "pr-pipeline-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
 
-# Least-privilege floor for the orchestrator. Verified against all 7 called workflows on
-# 2026-09-27: none use the SARIF/security-events API. Only gdunit4_tests and gut_tests
-# request checks:write, granted at the job level below rather than here.
+# Least-privilege floor for the orchestrator. Verified against the 4 called
+# workflows actually present in this pipeline (gdlint, lint_readme, yamllint,
+# gut_tests) as of 2026-09-28: none use the SARIF/security-events API. Only
+# gut_tests requests checks:write, granted at the job level below rather
+# than here.
 permissions:
   contents: "read"
   pull-requests: "read"
@@ -34,9 +36,14 @@ jobs:
       # Called-workflow self-changes: a PR that edits one of these files alone
       # doesn't touch any .gd/test/py path, so gdscript/python_tests stay false
       # and the job that runs *that* workflow gets skipped untested.
-      gdunit4_workflow: "${{ steps.filter.outputs.gdunit4_workflow }}"
       gut_workflow: "${{ steps.filter.outputs.gut_workflow }}"
-      browser_workflow: "${{ steps.filter.outputs.browser_workflow }}"
+      # NOTE: gdunit4_workflow / browser_workflow outputs were removed here.
+      # Neither addons/gdunit4 tests nor a browser-test workflow exist in this
+      # pipeline yet, and no job below consumed them. Re-add both the output
+      # line and a matching `filters:` entry together if/when those workflows
+      # are introduced -- a dangling output with no filter behind it silently
+      # resolves to an empty string rather than erroring, which is worse than
+      # just not having it.
     steps:
       - name: "Checkout Code"
         uses: "actions/checkout@v7.0.1"
@@ -59,6 +66,13 @@ jobs:
         with:
           token: ""
           # On subsequent pushes, compare against the last commit. On initial PR open, fall back to the base branch.
+          # NOTE: on a `synchronize` event this diffs only the latest push, not
+          # the full PR -- a push that touches only workflow YAML will not
+          # mark gdscript/markdown true even if earlier commits in the same
+          # PR did. This is intentional (saves CI minutes on incremental
+          # pushes) but means "nothing ran" on a given push does not imply
+          # "nothing ran for this PR" -- check earlier runs in the PR's
+          # Checks tab too.
           base: "${{ github.event.before == '0000000000000000000000000000000000000000' && github.event.pull_request.base.sha || github.event.before }}"
           filters: |
             gdscript:
@@ -66,7 +80,8 @@ jobs:
               - '**/*.tscn'         # Godot scene files
               - '**/*.tres'         # Godot resource files
               - 'project.godot'
-              - 'test/**'           # Corrected to capture Godot tests (GUT/GDUnit4)
+              - 'tests/**'          # was 'test/**' (singular) -- didn't match
+                                     # this repo's tests/unit, tests/integration
             markdown:
               - '**/*.md'
               - '**/*.txt'          # Grouped text files with documentation
