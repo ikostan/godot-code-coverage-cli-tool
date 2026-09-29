@@ -1,0 +1,40 @@
+---
+name: "Release Drafter"
+
+on:  # yamllint disable-line rule:truthy
+  # Makes it reusable; called by other workflows
+  workflow_call:  # yamllint disable rule:empty-values
+    secrets:
+      AUTH_TOKEN:
+        description: "Auth GITHUB Token"
+        required: true
+    outputs:
+      release_tag:
+        description: "The resolved release tag (e.g., v0.6.1)"
+        value: "${{ jobs.update_release_draft.outputs.tag_name }}"
+
+permissions:
+  contents: "read"
+
+jobs:
+  update_release_draft:
+    permissions:
+      contents: "write"
+      pull-requests: "write"
+    runs-on: "ubuntu-latest"
+    outputs:
+      tag_name: "${{ steps.drafter.outputs.tag_name }}"  # Expose from step
+    steps:
+      # yamllint disable-line rule:line-length
+      - uses: "release-drafter/release-drafter@34d80673e067bdc0c24568d3af899c216adcfaa9"
+        id: "drafter"  # Add ID to access outputs
+        with:
+          config-name: "release-drafter.yml"  # Explicitly point to your config
+        env:
+          GITHUB_TOKEN: "${{ secrets.AUTH_TOKEN }}"
+      - name: "Validate release tag from release-drafter"
+        run: |
+          if [[ -z "${{ steps.drafter.outputs.tag_name }}" ]]; then
+            echo "Error: release-drafter did not produce a tag_name"
+            exit 1
+          fi

@@ -1,0 +1,47 @@
+---
+name: "Main CI/CD Pipeline"
+
+# Define permissions at the workflow level
+permissions:
+  contents: "write"
+  pull-requests: "write"
+  actions: "read"
+  # Needed to upload SARIF results
+  security-events: "write"
+  checks: "write"  # Add this to allow check run creation
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    # Triggers on pushes to main
+    branches: [main]  # yamllint disable-line rule:quoted-strings
+
+jobs:
+  gdlint:
+    name: "GDScript Lint and Format Check"
+    uses: "./.github/workflows/gdlint.yml"  # Removed extra /workflows/
+  readmelint:
+    name: "Markdown Lint"
+    uses: "./.github/workflows/lint_readme.yml"
+  yamllint:
+    name: "YAML Lint"
+    uses: "./.github/workflows/yamllint.yml"
+    with:
+      config-path: ".github/workflows/*.yml"
+  gut_tests:
+    name: "GUT Unit Tests"
+    uses: "./.github/workflows/gut_tests.yml"
+    needs:
+      - "gdlint"
+      - "readmelint"
+      - "yamllint"
+    secrets:
+      CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}"
+  release_drafter:
+    name: "Release Drafter"
+    needs:
+      - "codeql"
+      - "snyk"
+      - "trivy"
+    uses: "./.github/workflows/release_drafter.yml"
+    secrets:
+      AUTH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
