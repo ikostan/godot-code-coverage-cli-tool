@@ -32,6 +32,7 @@ It must have **no dependency** on:
 - Any Coverage singleton
 
 **Core principle (fail-closed)**:
+
 The instrumentor must never claim coverage correctness when it cannot prove that the transformation is safe and semantically equivalent. When in doubt, it must fail explicitly rather than produce plausible but incorrect coverage.
 
 > **Scope note**: The "no SceneTree / runtime dependency" constraint applies only to the instrumentor itself. The runtime verification harness (and any corpus entries that exercise loading behaviour) are allowed to use the full Godot runtime.

@@ -16,9 +16,11 @@ assignees: ikostan
 ### 🔬 Steps to Reproduce
 
 1. **Target Source (Snippet or File):**
+
 ```gdscript
    # Paste the exact GDScript that caused the failure
 ```
+
 2. **Configuration Used (`enable_instrumentation`, etc.):**
 3. **Execution Command / Pipeline:**
 
