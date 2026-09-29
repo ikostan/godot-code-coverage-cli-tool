@@ -12,12 +12,12 @@ Both issues from v1.3 are corrected: line numbers have been re-counted against t
 - All sources use Unix line endings (`\n` only).
 - Default configuration (unless overridden):
 
-  ```
-  enable_instrumentation = true
-  include_non_executable = true
-  emit_function_metadata = true
-  hit_recorder_expression = "__coverage_hit({line})"
-  ```
+```gdscript
+ enable_instrumentation = true
+ include_non_executable = true
+ emit_function_metadata = true
+ hit_recorder_expression = "__coverage_hit({line})"
+```
   
 - Success entries → Contract §13.1 artifacts.
 - Expected-failure entries → Contract §13.2 artifacts.
