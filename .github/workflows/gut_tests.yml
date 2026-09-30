@@ -3,13 +3,15 @@ name: "GUT Tests"
 
 on:  # yamllint disable-line rule:truthy
   workflow_call:
-    inputs:
-      godot_version:
-        type: "string"
-        default: "4.7.1-stable"
-      godot_sha256:
-        type: "string"
-        default: "c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba"
+  # NOTE: godot_version / godot_sha256 inputs were removed here. Neither was
+  # ever read by the job below -- the setup step always used env.GODOT_VERSION
+  # regardless of what a caller passed, so a caller overriding godot_version
+  # was silently ignored with no error from GitHub. GODOT_VERSION below is
+  # this workflow's single source of truth for now. If per-call version
+  # overrides become a real need, wire inputs.godot_version into the "Setup
+  # Godot" step deliberately (stripping any "-stable" suffix first, since
+  # chickensoft-games/setup-godot expects bare major.minor.patch) rather than
+  # re-adding an input that nothing consumes.
 
 env:
   # Pin this to the exact Godot version this project targets.
@@ -25,6 +27,7 @@ jobs:
         uses: "actions/checkout@v4"
         with:
           # contrib/Gut is a git submodule and is the source for addons/gut
+          persist-credentials: false
           submodules: "recursive"
 
       - name: "Setup Godot"
