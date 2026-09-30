@@ -1,0 +1,172 @@
+---
+name: "Pull Request Pipeline"
+
+# Cancel stale runs on rapid successive pushes to the same PR, saving CI minutes
+concurrency:
+  group: "pr-pipeline-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: true
+
+# Least-privilege floor for the orchestrator. Verified against the 4 called
+# workflows actually present in this pipeline (gdlint, lint_readme, yamllint,
+# gut_tests) as of 2026-09-28: none use the SARIF/security-events API. Only
+# gut_tests requests checks:write, granted at the job level below rather
+# than here.
+permissions:
+  contents: "read"
+  pull-requests: "read"
+
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - "main"  # yamllint disable-line rule:quoted-strings
+
+jobs:
+  detect-changes:
+    name: "Detect Changed Files"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 10
+    permissions:
+      contents: "read"
+      # Required for dorny/paths-filter to call the GitHub REST API (see the
+      # "token" input below). Job-level permissions REPLACE the workflow-level
+      # grant above rather than adding to it, so this must be repeated here --
+      # without it the API call is denied and the action silently falls back
+      # to a two-commit git diff that only covers the latest push, not the
+      # whole PR. See the "token" comment below for the failure mode this fixes.
+      pull-requests: "read"
+    outputs:
+      gdscript: "${{ steps.filter.outputs.gdscript }}"
+      python_tests: "${{ steps.filter.outputs.python_tests }}"
+      markdown: "${{ steps.filter.outputs.markdown }}"
+      yaml: "${{ steps.filter.outputs.yaml }}"
+      ci: "${{ steps.filter.outputs.ci }}"
+      # Called-workflow self-changes: a PR that edits one of these files alone
+      # doesn't touch any .gd/test/py path, so gdscript/python_tests stay false
+      # and the job that runs *that* workflow gets skipped untested.
+      gut_workflow: "${{ steps.filter.outputs.gut_workflow }}"
+      # NOTE: gdunit4_workflow / browser_workflow outputs were removed here.
+      # Neither addons/gdunit4 tests nor a browser-test workflow exist in this
+      # pipeline yet, and no job below consumed them. Re-add both the output
+      # line and a matching `filters:` entry together if/when those workflows
+      # are introduced -- a dangling output with no filter behind it silently
+      # resolves to an empty string rather than erroring, which is worse than
+      # just not having it.
+    steps:
+      - name: "Checkout Code"
+        uses: "actions/checkout@v7.0.1"
+        with:
+          # Full history: needed so paths-filter's git-diff fallback (used
+          # for non-pull_request events, or if the API call above is ever
+          # unavailable) can find a common ancestor rather than failing on a
+          # shallow clone.
+          fetch-depth: 0
+      - name: "Filter Paths"
+        # Pinned to a full commit SHA per security review: the @v3 tag is a mutable
+        # major-version pointer that has moved several times (currently v3.0.2+).
+        # This SHA corresponds to the v3.0.2 release, verified against dorny/paths-filter's
+        # published history. Newer v3.0.x patches exist (e.g. v3.0.4, which escapes
+        # multi-line filenames in list-files output) -- verify the latest with
+        # `git ls-remote --tags https://github.com/dorny/paths-filter.git v3` and
+        # update this SHA if you want that fix.
+        uses: "dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36"  # v3.0.2
+        id: "filter"
+        with:
+          # IMPORTANT: was token: "" (empty). An empty token disables the
+          # GitHub API path entirely, and on this pinned version that also
+          # makes the action ignore `base` unconditionally on pull_request
+          # events -- it falls back to diffing only the two most recently
+          # fetched commits, so only the latest push's files are detected,
+          # not the full PR. Confirmed via the "Github token is not
+          # available - changes will be detected using git diff" log line
+          # and a run that found only 1 changed file despite earlier commits
+          # in the same PR touching dozens of files.
+          #
+          # Supplying the token switches to the GitHub REST API, which
+          # correctly diffs the full PR against its true base branch
+          # regardless of how many commits/pushes it contains. This makes
+          # `base` (below) a no-op for pull_request events -- kept only in
+          # case this workflow is ever also triggered by push/other events.
+          token: "${{ github.token }}"
+          base: >-
+            ${{ github.event.before ==
+            '0000000000000000000000000000000000000000' &&
+            github.event.pull_request.base.sha ||
+            github.event.before }}
+          filters: |
+            gdscript:
+              - '**/*.gd'
+              - '**/*.tscn'         # Godot scene files
+              - '**/*.tres'         # Godot resource files
+              - 'project.godot'
+              - 'tests/**'          # was 'test/**' (singular) -- didn't match
+                                     # this repo's tests/unit, tests/integration
+            markdown:
+              - '**/*.md'
+              - '**/*.txt'          # Grouped text files with documentation
+            yaml:
+              - '**/*.yml'
+              - '**/*.yaml'
+            gut_workflow:
+              - '.github/workflows/gut_tests.yml'
+
+
+  # NOTE: jobs below call a reusable workflow via `uses:`. That job shape does not support
+  # `runs-on` or `timeout-minutes` — GitHub Actions only allows needs/if/permissions/uses/
+  # with/secrets/strategy/name on a call job. Each called workflow sets its own timeout
+  # internally instead (see gdlint.yml, gut_tests.yml, etc.).
+
+  gdlint:
+    name: "GDScript Lint and Format Check"
+    needs: "detect-changes"
+    permissions:
+      contents: "read"
+    if: "${{ needs.detect-changes.outputs.gdscript == 'true' }}"
+    uses: "./.github/workflows/gdlint.yml"
+
+  readmelint:
+    name: "Markdown Lint"
+    needs: "detect-changes"
+    permissions:
+      contents: "read"
+    if: "${{ needs.detect-changes.outputs.markdown == 'true' }}"
+    uses: "./.github/workflows/lint_readme.yml"
+
+  yamllint:
+    name: "YAML Lint"
+    needs: "detect-changes"
+    permissions:
+      contents: "read"
+      # Required: yamllint.yml's own workflow declares this, even
+      # though nothing in its steps currently exercises it. GitHub
+      # validates the declared request against the caller's grant
+      # at call time, regardless of whether it's actually used.
+      pull-requests: "read"
+    if: "${{ needs.detect-changes.outputs.yaml == 'true' }}"
+    uses: "./.github/workflows/yamllint.yml"
+    with:
+      config-path: ".github/workflows/*.yml"
+
+  gut_tests:
+    name: "GUT Unit Tests"
+    needs:
+      - "detect-changes"
+      - "gdlint"
+      - "readmelint"
+      - "yamllint"
+    permissions:
+      contents: "read"
+      checks: "write"  # Required: gut_tests.yml's own job declares checks:write
+    # yamllint disable rule:line-length
+    if: >-
+      ${{
+        always() &&
+        (
+          needs.detect-changes.outputs.gdscript == 'true' ||
+          needs.detect-changes.outputs.gut_workflow == 'true'
+        ) &&
+        needs.gdlint.result != 'failure' &&
+        needs.readmelint.result != 'failure' &&
+        needs.yamllint.result != 'failure'
+      }}
+    # yamllint enable rule:line-length
+    uses: "./.github/workflows/gut_tests.yml"

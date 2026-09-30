@@ -1,0 +1,69 @@
+---
+name: "GUT Tests"
+
+on:  # yamllint disable-line rule:truthy
+  workflow_call:
+  # NOTE: godot_version / godot_sha256 inputs were removed here. Neither was
+  # ever read by the job below -- the setup step always used env.GODOT_VERSION
+  # regardless of what a caller passed, so a caller overriding godot_version
+  # was silently ignored with no error from GitHub. GODOT_VERSION below is
+  # this workflow's single source of truth for now. If per-call version
+  # overrides become a real need, wire inputs.godot_version into the "Setup
+  # Godot" step deliberately (stripping any "-stable" suffix first, since
+  # chickensoft-games/setup-godot expects bare major.minor.patch) rather than
+  # re-adding an input that nothing consumes.
+
+env:
+  # Pin this to the exact Godot version this project targets.
+  # Must include major.minor.patch (a pre-release label is optional).
+  GODOT_VERSION: "4.7.1"
+
+jobs:
+  gut-tests:
+    name: "Run GUT tests"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          # contrib/Gut is a git submodule and is the source for addons/gut
+          persist-credentials: false
+          submodules: "recursive"
+
+      - name: "Setup Godot"
+        uses: "chickensoft-games/setup-godot@v1"
+        with:
+          version: "${{ env.GODOT_VERSION }}"
+          use-dotnet: false
+          include-templates: false
+
+      - name: "Verify Godot version"
+        run: "godot --version"
+
+      - name: "Install GUT addon from submodule"
+        run: "bash update_addons.sh --no-init"
+
+      - name: "Warm up asset import cache"
+        # First headless run can otherwise interleave import work with test
+        # output and occasionally produce a flaky first pass. Failures here
+        # are not fatal - the real signal is the test run below.
+        run: "godot --headless --path . --import || true"
+
+      - name: "Run GUT tests"
+        run: >
+          godot --headless --path .
+          -s addons/gut/gut_cmdln.gd
+          -gdir=res://tests
+          -ginclude_subdirs
+          -gexit
+          -gexit_on_success
+          -glog=3
+          -gjunit_xml_file=res://test_results.xml
+
+      - name: "Upload JUnit test results"
+        if: "always()"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "gut-test-results"
+          path: "test_results.xml"
+          if-no-files-found: "warn"

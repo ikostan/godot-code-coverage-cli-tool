@@ -1,28 +1,38 @@
-**Seed Corpus Specification v1.4**
+# Seed Corpus Specification v1.4
+
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
+
 *(Final – ready for materialization)*
 
-Both issues from v1.3 are corrected: line numbers have been re-counted against the literal source blocks, and Sub-case A now uses a construct that genuinely defeats a line-oriented stateful analyzer, with the failure mechanism named explicitly.
+Both issues from v1.3 are corrected: line numbers have been re-counted against 
+the literal source blocks, and Sub-case A now uses a construct that genuinely 
+defeats a line-oriented stateful analyzer, with the failure mechanism named 
+explicitly.
 
 ### Common conventions
 
 - Line numbers are 1-based.
 - All sources use Unix line endings (`\n` only).
 - Default configuration (unless overridden):
-  ```
-  enable_instrumentation = true
-  include_non_executable = true
-  emit_function_metadata = true
-  hit_recorder_expression = "__coverage_hit({line})"
-  ```
+
+```gdscript
+ enable_instrumentation = true
+ include_non_executable = true
+ emit_function_metadata = true
+ hit_recorder_expression = "__coverage_hit({line})"
+```
+  
 - Success entries → Contract §13.1 artifacts.
 - Expected-failure entries → Contract §13.2 artifacts.
 
 **General classification rules**
+
 - Declaration **with initializer** → `executable`
 - Bare declaration **without initializer** → `non_executable`
 - Lambda **definition line** → `structural`; lambda **body lines** → `executable`
 
 **FunctionMetadata rules**
+
 - Only named functions/methods appear.
 - Anonymous lambdas are omitted.
 - `class_scope` = nearest enclosing class name, or `""` for top-level.
@@ -34,6 +44,7 @@ Both issues from v1.3 are corrected: line numbers have been re-counted against t
 ### Required Entries
 
 #### 1. `basic_statements.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -50,9 +61,11 @@ func _ready() -> void:
 ```
 
 **Line map** (1-based):
+
 1: comment, 2: extends, 3: blank, 4: bare, 5: initialized, 6: blank, 7: func _ready, 8: var x, 9: x += 1, 10: print(x)
 
 **Mandatory classifications**:
+
 - 1 → non_executable (comment)
 - 2 → structural
 - 3 → non_executable
@@ -63,6 +76,7 @@ func _ready() -> void:
 - 8–10 → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -78,6 +92,7 @@ func _ready() -> void:
 ---
 
 #### 2. `control_flow.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -93,9 +108,11 @@ func test(v: int) -> int:
 ```
 
 **Line map**:
+
 1: extends, 2: blank, 3: func test, 4: if, 5: return, 6: elif, 7: return, 8: else, 9: return
 
 **Mandatory classifications**:
+
 - 1 → structural
 - 2 → non_executable
 - 3 → structural
@@ -103,6 +120,7 @@ func test(v: int) -> int:
 - 5, 7, 9 → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -118,6 +136,7 @@ func test(v: int) -> int:
 ---
 
 #### 3. `multiline.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -132,10 +151,12 @@ func build() -> String:
 **Line map**: 1 extends, 2 blank, 3 func, 4 assignment start, 5 continuation, 6 return
 
 **Mandatory classifications**:
+
 - 5 → structural (backslash continuation)
 - 4, 6 → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -153,6 +174,7 @@ func build() -> String:
 ---
 
 #### 4. `lambdas.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -166,12 +188,14 @@ func run() -> void:
 ```
 
 **Mandatory classifications** (unconditional rule):
+
 - Lambda definition line (`var f = func(...) -> ...:`) → structural
 - Lambda body (`return x + 1`) → executable
 - `var result = f.call(10)` → executable
 - `print(result)` → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -183,11 +207,13 @@ func run() -> void:
   }
 ]
 ```
+
 *(Anonymous lambda is intentionally omitted from `functions`.)*
 
 ---
 
 #### 5. `static_init.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -209,6 +235,7 @@ func get_counter() -> int:
 - Ordinary method body → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -231,6 +258,7 @@ func get_counter() -> int:
 ---
 
 #### 6. `typed_annotations.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -243,11 +271,13 @@ func _ready() -> void:
 ```
 
 **Mandatory classifications**:
+
 - `@onready var label: Label = $Label` → executable (the annotation only affects timing, not executability)
 - `func _ready() -> void:` → structural
 - `label.text = "ok"` → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -263,6 +293,7 @@ func _ready() -> void:
 ---
 
 #### 7. `class_level.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -279,12 +310,14 @@ func make() -> Inner:
 ```
 
 **Mandatory classifications**:
+
 - `class Inner:` → structural
 - `var value: int = 7` → executable (initializer present)
 - Nested method bodies → executable
 - Outer method body → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -307,6 +340,7 @@ func make() -> Inner:
 ---
 
 #### 8. `autoload_style.gd`
+
 **Pipeline**: Success
 
 ```gdscript
@@ -324,6 +358,7 @@ func _ready() -> void:
 - Body → executable
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -339,6 +374,7 @@ func _ready() -> void:
 ---
 
 #### 9. `await_coroutines.gd`
+
 **Pipeline**: Success
 **Primary obligations**: coroutine / `await` semantic preservation (§11)
 
@@ -351,6 +387,7 @@ func run() -> void:
 ```
 
 **Mandatory classifications**:
+
 - `await get_tree().process_frame` → executable
 - `print("resumed")` → executable
 - Function header → structural
@@ -358,6 +395,7 @@ func run() -> void:
 **Runtime exercise note**: This entry requires a live, ticking `SceneTree` (frame boundary). It is expected to be the heaviest / most environment-sensitive test in the seed suite and should be budgeted accordingly in CI. The exercise must confirm the hit on the `await` line is recorded before suspension and the subsequent line is recorded after resumption, without breaking the coroutine.
 
 **Expected FunctionMetadata**:
+
 ```json
 [
   {
@@ -373,6 +411,7 @@ func run() -> void:
 ---
 
 #### 10. `disabled_instrumentation.gd`
+
 **Pipeline**: Success (`enable_instrumentation = false`)
 **Primary obligations**: §3.1 mandatory shape + partition invariant
 
@@ -388,6 +427,7 @@ Configuration override: `enable_instrumentation = false`.
 ---
 
 #### 11. `edge_cases.gd` (two sub-cases)
+
 **Pipeline**: Expected-failure
 **Primary obligations**: fail-closed behaviour
 
@@ -403,6 +443,7 @@ func broken(v: int) -> int:
 ```
 
 **Failure mechanism (named)**:
+
 The analyzer's indentation-based block tracker cannot distinguish the dedent that closes the lambda body from the dedent that closes the enclosing ternary's parenthetical continuation, because both the lambda's final statement and the `.call()` that terminates the outer expression occur in a way that leaves the indentation state machine unable to decide whether it is still inside the lambda or has returned to the ternary. A purely line-oriented stateful analyzer without a full expression parser has no reliable way to resolve this ambiguity and must therefore refuse to transform the file.
 
 > **Note for future revision**: If bracket-continuation support (see `bracket_continuation.gd` stretch entry) is later implemented with an independent paren-depth counter, this construct's unclassifiability should be re-validated — a more sophisticated tracker might resolve it correctly, in which case this sub-case would need a replacement construct.
@@ -450,3 +491,5 @@ Any valid source, but with an empty or unknown-placeholder `hit_recorder_express
 - All sources and goldens use Unix line endings only.
 
 The corpus is now fully determined and free of the previously identified arithmetic and justification errors. Ready to materialize the directory structure and concrete skeleton files under `tests/corpus/`.
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->

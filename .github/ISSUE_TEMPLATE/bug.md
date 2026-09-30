@@ -6,6 +6,8 @@ labels: bug
 assignees: ikostan
 ---
 
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
+
 ### 💥 Issue Description
 
 <!-- Clearly define the failure. Did the instrumentor guess incorrectly instead of failing? Did it break the source code structure? -->
@@ -14,9 +16,11 @@ assignees: ikostan
 ### 🔬 Steps to Reproduce
 
 1. **Target Source (Snippet or File):**
+
 ```gdscript
    # Paste the exact GDScript that caused the failure
 ```
+
 2. **Configuration Used (`enable_instrumentation`, etc.):**
 3. **Execution Command / Pipeline:**
 
@@ -32,3 +36,5 @@ assignees: ikostan
 * **OS:** Linux / Windows / macOS
 
 ### 💡 Possible Root Cause (Optional)
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->

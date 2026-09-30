@@ -1,0 +1,55 @@
+---
+# An example .markdownlint-cli2.yaml file
+# Example markdownlint configuration with all
+# properties set to their default value
+# https://github.com/DavidAnson/markdownlint/blob/v0.32.1/schema/.markdownlint.yaml
+
+
+# MarkdownLint should now ignore the staticfiles directory
+ignores:
+  - ".venv/**"
+  - "venv/**"
+  - "staticfiles/**"
+  - "static/**"
+  - "export/**"
+  - "artifacts/**"
+
+# Fix any fixable errors
+fix: true
+
+# Ignore files referenced by .gitignore (only valid at root)
+gitignore: true
+# Define glob expressions to use (only valid at root)
+# globs:
+#  - "!*bout.md"
+# Define glob expressions to ignore
+# ignores:
+#  - "ignore*.md"
+
+# Rule-level (markdownlint) configuration must be nested under `config:` in
+# markdownlint-cli2's schema -- unlike the older single-file
+# .markdownlint.yaml format this comment block above was originally copied
+# from, where rule keys like MD013 live at the root. At root level here they
+# are not a recognized CLI2 option and are silently ignored, leaving every
+# rule (including MD013) on its default settings regardless of what's
+# written below.
+config:
+  # MD013/line-length : Line length :
+  # https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md013.md
+  MD013:
+    # Number of characters
+    line_length: 80
+    # Number of characters for headings
+    heading_line_length: 80
+    # Number of characters for code blocks
+    code_block_line_length: 300
+    # Include code blocks
+    code_blocks: false
+    # Include tables
+    tables: false
+    # Include headings
+    headings: true
+    # Strict length checking
+    strict: false
+    # Stern length checking
+    stern: false

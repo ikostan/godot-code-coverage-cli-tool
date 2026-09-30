@@ -1,0 +1,56 @@
+---
+name: "GDScript Lint and Format Check"
+
+on:  # yamllint disable-line rule:truthy
+  # Makes it reusable; called by other workflows
+  workflow_call:  # yamllint disable rule:empty-values
+
+jobs:
+  review:
+    name: "Lint and Format Check"
+    runs-on: "ubuntu-latest"
+    # Adding 'timeout-minutes: 10' would prevent jobs from running
+    # indefinitely if something goes wrong
+    timeout-minutes: 10
+    steps:
+
+      - name: "Checkout code"
+        uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Set up Python"
+        uses: "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97"  # v7.0.0
+        with:
+          python-version: "3.x"
+
+      - name: "Cache PIP Dependencies"
+        # check.sh bootstraps its own gdtoolkit install into a local .py_venv
+        # (see below) -- this cache still helps because that install still
+        # goes through pip, which reads from ~/.cache/pip when warm.
+        uses: "actions/cache@v6"
+        with:
+          path: "~/.cache/pip"
+          key: "${{ runner.os }}-pip-gdtoolkit"
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # NOTE: no separate "Install GDToolkit" step here. check.sh installs
+      # gdtoolkit itself into a local .py_venv on first run (see check.sh),
+      # so a standalone global `pip install gdtoolkit` here would only
+      # install a copy that check.sh's own venv never uses -- redundant work
+      # for no effect.
+
+      - name: "Check Formatting"
+        # Runs via check.sh so .gdcheckignore exclusions (tests/corpus/*.gd,
+        # other.gd -- see check.sh + .gdcheckignore) are actually honored.
+        # Calling gdformat directly on a path bypasses .gdcheckignore
+        # entirely, since only check.sh's `find ... -prune` logic reads it.
+        run: |
+          bash check.sh --format
+
+      - name: "Lint Code"
+        # Same reasoning as above: routed through check.sh so the ignore
+        # list applies here too, not just to formatting.
+        run: |
+          bash check.sh --lint

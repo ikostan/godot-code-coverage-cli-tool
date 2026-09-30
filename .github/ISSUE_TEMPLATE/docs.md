@@ -6,6 +6,8 @@ labels: docs
 assignees: ikostan
 ---
 
+<!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
+
 ### 📚 Documents Affected
 - [ ] `instrumentation-contract-vX.X.md`
 - [ ] `seed-corpus-specification-vX.X.md`
@@ -19,3 +21,5 @@ assignees: ikostan
 ### 🔄 Version Bump Required?
 - [ ] Yes (Update contract version and reflect in metadata output).
 - [ ] No (Clarification or typo fix only).
+
+<!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
