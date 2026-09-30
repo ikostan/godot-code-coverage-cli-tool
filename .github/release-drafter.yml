@@ -1,0 +1,70 @@
+---
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+
+# Explicit target branch for the draft release. Without this, some setups
+# hit a "target_commitish" resolution error -- carried over from the other
+# project's config, which noted the same fix.
+commitish: "main"
+
+categories:
+  - title: "🚀 Features"
+    labels:
+      - "feature"
+      - "enhancement"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "fix"
+      - "bug"
+      - "bugfix"
+  - title: "📚 Documentation"
+    labels:
+      - "docs"
+      - "documentation"
+  # Merged from two overlapping categories (this project's "CI / Tooling"
+  # and the other project's "Maintenance") into one, so a PR can't land in
+  # the "wrong" one depending on which label was applied.
+  - title: "🧰 Maintenance & Tooling"
+    labels:
+      - "ci"
+      - "workflow"
+      - "chore"
+      - "setup"
+      - "tools"
+      - "CI/CD"
+  - title: "🧪 Tests"
+    labels:
+      - "test"
+      - "tests"
+
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&#@'
+no-changes-template: "- No changes"
+
+version-resolver:
+  major:
+    labels:
+      - "major"
+      - "breaking"
+  minor:
+    labels:
+      - "minor"
+      - "feature"
+      - "enhancement"
+  patch:
+    labels:
+      - "patch"
+      - "fix"
+      - "bug"
+      - "chore"
+      - "docs"
+      - "ci"
+  default: "patch"
+
+exclude-labels:
+  - "skip-changelog"
+
+template: |
+  ## Changes
+
+  $CHANGES
