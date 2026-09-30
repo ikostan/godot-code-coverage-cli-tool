@@ -53,4 +53,3 @@ config:
     strict: false
     # Stern length checking
     stern: false
-  
