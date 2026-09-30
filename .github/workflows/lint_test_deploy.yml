@@ -34,8 +34,6 @@ jobs:
       - "gdlint"
       - "readmelint"
       - "yamllint"
-    secrets:
-      CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}"
   release_drafter:
     name: "Release Drafter"
     uses: "./.github/workflows/release_drafter.yml"
