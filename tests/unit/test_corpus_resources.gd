@@ -7,7 +7,8 @@ const CORPUS_NAMES = [
 	"class_level",
 	"control_flow",
 	"disabled_instrumentation",
-	"edge_cases",
+	"edge_cases_invalid_config",
+	"edge_cases_unsupported_syntax",
 	"lambdas",
 	"multiline",
 	"static_init",
@@ -18,7 +19,7 @@ const CORPUS_NAMES = [
 func test_corpus_uids_are_valid_unique_and_resolve_to_their_scripts():
 	var seen: Array[int] = []
 	for corpus_name in CORPUS_NAMES:
-		var path = "res://tests/corpus/%s.gd" % corpus_name
+		var path = "res://tests/corpus/%s/source.gd" % corpus_name
 		var uid_path = path + ".uid"
 		assert_true(FileAccess.file_exists(uid_path), uid_path)
 		if not FileAccess.file_exists(uid_path):
