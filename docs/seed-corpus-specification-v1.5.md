@@ -55,20 +55,20 @@ tests/corpus/
 - **`.uid` sidecar**: `source.gd` keeps its Godot `.uid` sidecar beside it (`source.gd.uid`).
 - **Exercise mechanism**: whether success entries carry an `exercise.gd` (Contract §13.1) or are exercised by the GUT integration suite is decided by the runtime Hit Collector design task (#23). This layout accommodates either.
 
-| # | Entry                              | Directory                         | Pipeline         | `config.json` |
-|---|------------------------------------|-----------------------------------|------------------|---------------|
-| 1 | `basic_statements.gd`              | `basic_statements/`               | Success          | none          |
-| 2 | `control_flow.gd`                  | `control_flow/`                   | Success          | none          |
-| 3 | `multiline.gd`                     | `multiline/`                      | Success          | none          |
-| 4 | `lambdas.gd`                       | `lambdas/`                        | Success          | none          |
-| 5 | `static_init.gd`                   | `static_init/`                    | Success          | none          |
-| 6 | `typed_annotations.gd`             | `typed_annotations/`              | Success          | none          |
-| 7 | `class_level.gd`                   | `class_level/`                    | Success          | none          |
-| 8 | `autoload_style.gd`                | `autoload_style/`                 | Success          | none          |
-| 9 | `await_coroutines.gd`              | `await_coroutines/`               | Success          | none          |
-| 10 | `disabled_instrumentation.gd`     | `disabled_instrumentation/`       | Success          | yes           |
+| #  | Entry                              | Directory                        | Pipeline         | `config.json` |
+|----|------------------------------------|----------------------------------|------------------|---------------|
+| 1  | `basic_statements.gd`              | `basic_statements/`              | Success          | none          |
+| 2  | `control_flow.gd`                  | `control_flow/`                  | Success          | none          |
+| 3  | `multiline.gd`                     | `multiline/`                     | Success          | none          |
+| 4  | `lambdas.gd`                       | `lambdas/`                       | Success          | none          |
+| 5  | `static_init.gd`                   | `static_init/`                   | Success          | none          |
+| 6  | `typed_annotations.gd`             | `typed_annotations/`             | Success          | none          |
+| 7  | `class_level.gd`                   | `class_level/`                   | Success          | none          |
+| 8  | `autoload_style.gd`                | `autoload_style/`                | Success          | none          |
+| 9  | `await_coroutines.gd`              | `await_coroutines/`              | Success          | none          |
+| 10 | `disabled_instrumentation.gd`      | `disabled_instrumentation/`      | Success          | yes           |
 | 11 | `edge_cases_unsupported_syntax.gd` | `edge_cases_unsupported_syntax/` | Expected-failure | none          |
-| 12 | `edge_cases_invalid_config.gd`    | `edge_cases_invalid_config/`      | Expected-failure | yes           |
+| 12 | `edge_cases_invalid_config.gd`     | `edge_cases_invalid_config/`     | Expected-failure | yes           |
 
 #### `config.json`
 
