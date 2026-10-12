@@ -1,0 +1,3 @@
+{
+  "hit_recorder_expression": "__coverage_hit({column})"
+}

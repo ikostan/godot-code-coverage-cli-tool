@@ -1,0 +1,5 @@
+# Seed corpus sources and golden artifacts are compared byte for byte
+# against the Seed Corpus Specification and against instrumentor output.
+# Force LF so a Windows clone with core.autocrlf=true can't check them out
+# with CRLF and break every comparison (see #38).
+tests/corpus/** text eol=lf

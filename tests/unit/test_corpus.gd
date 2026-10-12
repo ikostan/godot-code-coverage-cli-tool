@@ -1,14 +1,14 @@
 extends GutTest
 
-const ControlFlow = preload("res://tests/corpus/control_flow.gd")
-const ClassLevel = preload("res://tests/corpus/class_level.gd")
-const EdgeCases = preload("res://tests/corpus/edge_cases.gd")
-const Multiline = preload("res://tests/corpus/multiline.gd")
-const StaticInit = preload("res://tests/corpus/static_init.gd")
+const ControlFlow = preload("res://tests/corpus/control_flow/source.gd")
+const ClassLevel = preload("res://tests/corpus/class_level/source.gd")
+const EdgeCases = preload("res://tests/corpus/edge_cases_unsupported_syntax/source.gd")
+const Multiline = preload("res://tests/corpus/multiline/source.gd")
+const StaticInit = preload("res://tests/corpus/static_init/source.gd")
 
 var declaration_scripts = [
-	preload("res://tests/corpus/basic_statements.gd"),
-	preload("res://tests/corpus/disabled_instrumentation.gd"),
+	preload("res://tests/corpus/basic_statements/source.gd"),
+	preload("res://tests/corpus/disabled_instrumentation/source.gd"),
 ]
 var branch_cases = [
 	[-10, 10],
