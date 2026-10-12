@@ -1,7 +1,4 @@
-## res://tests/corpus/lambdas.gd
-
 extends Node
-
 
 func run() -> void:
 	var f = func(x: int) -> int:
