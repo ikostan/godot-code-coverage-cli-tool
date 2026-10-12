@@ -6,6 +6,8 @@ tag-template: "v$RESOLVED_VERSION"
 # hit a "target_commitish" resolution error -- carried over from the other
 # project's config, which noted the same fix.
 commitish: "main"
+# Treat published pre-releases as the previous release (baseline).
+include-pre-releases: true
 
 categories:
   - title: "🚀 Features"
@@ -36,6 +38,9 @@ categories:
     labels:
       - "test"
       - "tests"
+  - title: "📋 Tasks"
+    labels:
+      - "task"
 
 change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 change-title-escapes: '\<*_&#@'
