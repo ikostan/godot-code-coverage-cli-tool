@@ -1,12 +1,12 @@
 extends GutTest
 
-const AutoloadStyle = preload("res://tests/corpus/autoload_style.gd")
-const AwaitCoroutines = preload("res://tests/corpus/await_coroutines.gd")
-const Lambdas = preload("res://tests/corpus/lambdas.gd")
-const TypedAnnotations = preload("res://tests/corpus/typed_annotations.gd")
+const AutoloadStyle = preload("res://tests/corpus/autoload_style/source.gd")
+const AwaitCoroutines = preload("res://tests/corpus/await_coroutines/source.gd")
+const Lambdas = preload("res://tests/corpus/lambdas/source.gd")
+const TypedAnnotations = preload("res://tests/corpus/typed_annotations/source.gd")
 const STATEMENT_SCRIPTS = [
-	preload("res://tests/corpus/basic_statements.gd"),
-	preload("res://tests/corpus/disabled_instrumentation.gd"),
+	preload("res://tests/corpus/basic_statements/source.gd"),
+	preload("res://tests/corpus/disabled_instrumentation/source.gd"),
 ]
 
 var _capture: OutputCapture

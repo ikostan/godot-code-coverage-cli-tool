@@ -24,17 +24,14 @@ const ENTRIES = [
 	"await_coroutines",
 	"disabled_instrumentation",
 	"edge_cases_unsupported_syntax",
+	"edge_cases_invalid_config",
 ]
 
 # Entries the spec defines as a byte-for-byte copy of another entry's source
 # instead of giving them a source block of their own.
 const COPY_OF = {
 	"disabled_instrumentation": "basic_statements",
-}
-
-# Corpus file name, where it still differs from the spec entry name.
-const FILE_NAME_FOR_ENTRY = {
-	"edge_cases_unsupported_syntax": "edge_cases",
+	"edge_cases_invalid_config": "basic_statements",
 }
 
 
@@ -64,8 +61,35 @@ func test_every_corpus_source_is_byte_identical_to_its_spec_block():
 		)
 
 
+func test_entries_match_spec_and_corpus_directories():
+	var expected = _sorted(PackedStringArray(ENTRIES))
+	assert_eq(_sorted(_spec_entry_names()), expected, "spec entries vs ENTRIES")
+	assert_eq(
+		_sorted(DirAccess.get_directories_at(CORPUS_DIR)), expected, "corpus directories vs ENTRIES"
+	)
+
+
 func _corpus_path(entry: String) -> String:
-	return "%s/%s.gd" % [CORPUS_DIR, FILE_NAME_FOR_ENTRY.get(entry, entry)]
+	return "%s/%s/source.gd" % [CORPUS_DIR, entry]
+
+
+func _sorted(names: PackedStringArray) -> PackedStringArray:
+	var copy = names.duplicate()
+	copy.sort()
+	return copy
+
+
+# Names of every "#### N. `name.gd`" entry heading in the spec.
+func _spec_entry_names() -> PackedStringArray:
+	var names = PackedStringArray()
+	var files = _spec_files()
+	if files.size() != 1:
+		return names
+	var text = FileAccess.get_file_as_string("%s/%s" % [SPEC_DIR, files[0]])
+	var heading = RegEx.create_from_string("(?m)^#### \\d+\\. `([a-z_]+)\\.gd`")
+	for match in heading.search_all(text):
+		names.append(match.get_string(1))
+	return names
 
 
 func _spec_files() -> PackedStringArray:
