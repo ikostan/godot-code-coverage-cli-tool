@@ -100,6 +100,10 @@ jobs:
               - 'project.godot'
               - 'tests/**'          # was 'test/**' (singular) -- didn't match
                                      # this repo's tests/unit, tests/integration
+              # tests/unit/test_corpus_spec_sync.gd compares every corpus
+              # source with its block in this spec, so a spec-only PR must
+              # still run the GUT suite or corpus drift goes unnoticed.
+              - 'docs/seed-corpus-specification-*.md'
             markdown:
               - '**/*.md'
               - '**/*.txt'          # Grouped text files with documentation
