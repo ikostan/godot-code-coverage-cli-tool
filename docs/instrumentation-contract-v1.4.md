@@ -190,7 +190,7 @@ Preserving "error / exception behaviour" (§11) refers to semantic behaviour onl
 class_name InstrumentationResult
 extends RefCounted
 
-var contract_version: String = "1.2"
+var contract_version: String = "1.4"
 var script_path: String
 var original_source: String
 var instrumented_source: String
@@ -327,22 +327,23 @@ tests/corpus/
     expected.metadata.json     # success entries
     expected_hits.json         # success entries
     expected.error.json        # expected-failure entries
+    exercise.gd                # success entries, only if #23 chooses per-entry scripts
 ```
 
 - **Directory name**: the Seed Corpus Specification's source filename without `.gd` (e.g. `basic_statements/` for `basic_statements.gd`).
 - **`.uid` sidecar**: `source.gd` keeps its Godot `.uid` sidecar beside it (`source.gd.uid`).
-- **Exercise mechanism**: whether success entries carry an `exercise.gd` (§13.1) or are exercised by the GUT integration suite is decided by the runtime Hit Collector design task (#23). This layout accommodates either.
+- **Exercise mechanism**: whether success entries carry an `exercise.gd` (§13.1) or are exercised by the GUT integration suite is decided by the runtime Hit Collector design task (#23). This layout accommodates either. Until #23 decides, `exercise.gd` is **conditional**: it is neither required nor forbidden, and corpus completeness checks do not test for it.
 
 #### 13.1 Success entries
 
-| Artifact                   | Purpose                                                       |
-|----------------------------|---------------------------------------------------------------|
-| `source.gd`                | Original source                                               |
-| `config.json`              | *(optional)* Configuration overrides; see §13.3               |
-| `expected.instrumented.gd` | Deterministic golden instrumented source                      |
-| `expected.metadata.json`   | Classification, mappings, executable lines, skipped lines     |
-| `expected_hits.json`       | Runtime hit expectations                                      |
-| `exercise.gd`              | Script that exercises the known paths                         |
+| Artifact                   | Purpose                                                            |
+|----------------------------|--------------------------------------------------------------------|
+| `source.gd`                | Original source                                                    |
+| `config.json`              | *(optional)* Configuration overrides; see §13.3                    |
+| `expected.instrumented.gd` | Deterministic golden instrumented source                           |
+| `expected.metadata.json`   | Classification, mappings, executable lines, skipped lines          |
+| `expected_hits.json`       | Runtime hit expectations                                           |
+| `exercise.gd`              | *(conditional, pending #23)* Script that exercises the known paths |
 
 #### 13.2 Expected-failure entries
 
