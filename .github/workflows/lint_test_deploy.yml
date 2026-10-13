@@ -27,6 +27,9 @@ jobs:
     uses: "./.github/workflows/yamllint.yml"
     with:
       config-path: ".github/workflows/*.yml"
+  jsonlint:
+    name: "JSON Lint"
+    uses: "./.github/workflows/jsonlint.yml"
   gut_tests:
     name: "GUT Unit Tests"
     uses: "./.github/workflows/gut_tests.yml"
@@ -34,6 +37,7 @@ jobs:
       - "gdlint"
       - "readmelint"
       - "yamllint"
+      - "jsonlint"
   release_drafter:
     name: "Release Drafter"
     uses: "./.github/workflows/release_drafter.yml"

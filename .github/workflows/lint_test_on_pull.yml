@@ -6,9 +6,9 @@ concurrency:
   group: "pr-pipeline-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
 
-# Least-privilege floor for the orchestrator. Verified against the 4 called
+# Least-privilege floor for the orchestrator. Verified against the 5 called
 # workflows actually present in this pipeline (gdlint, lint_readme, yamllint,
-# gut_tests) as of 2026-09-28: none use the SARIF/security-events API. Only
+# jsonlint, gut_tests) as of 2026-10-12: none use the SARIF/security-events API. Only
 # gut_tests requests checks:write, granted at the job level below rather
 # than here.
 permissions:
@@ -39,6 +39,7 @@ jobs:
       python_tests: "${{ steps.filter.outputs.python_tests }}"
       markdown: "${{ steps.filter.outputs.markdown }}"
       yaml: "${{ steps.filter.outputs.yaml }}"
+      json: "${{ steps.filter.outputs.json }}"
       ci: "${{ steps.filter.outputs.ci }}"
       # Called-workflow self-changes: a PR that edits one of these files alone
       # doesn't touch any .gd/test/py path, so gdscript/python_tests stay false
@@ -110,6 +111,12 @@ jobs:
             yaml:
               - '**/*.yml'
               - '**/*.yaml'
+            json:
+              - '**/*.json'
+              # The linter and its workflow: a PR that only edits these
+              # must still run them, or a broken linter merges untested.
+              - 'workspace/json_lint.py'
+              - '.github/workflows/jsonlint.yml'
             gut_workflow:
               - '.github/workflows/gut_tests.yml'
 
@@ -150,6 +157,14 @@ jobs:
     with:
       config-path: ".github/workflows/*.yml"
 
+  jsonlint:
+    name: "JSON Lint"
+    needs: "detect-changes"
+    permissions:
+      contents: "read"
+    if: "${{ needs.detect-changes.outputs.json == 'true' }}"
+    uses: "./.github/workflows/jsonlint.yml"
+
   gut_tests:
     name: "GUT Unit Tests"
     needs:
@@ -157,6 +172,7 @@ jobs:
       - "gdlint"
       - "readmelint"
       - "yamllint"
+      - "jsonlint"
     permissions:
       contents: "read"
       checks: "write"  # Required: gut_tests.yml's own job declares checks:write
@@ -170,7 +186,8 @@ jobs:
         ) &&
         needs.gdlint.result != 'failure' &&
         needs.readmelint.result != 'failure' &&
-        needs.yamllint.result != 'failure'
+        needs.yamllint.result != 'failure' &&
+        needs.jsonlint.result != 'failure'
       }}
     # yamllint enable rule:line-length
     uses: "./.github/workflows/gut_tests.yml"
