@@ -1,12 +1,9 @@
 # Add Godot coverage corpus fixtures
 <!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
-This change adds a corpus of sample GDScript files for coverage 
-testing, covering autoloads, coroutine awaits, control flow, 
-lambdas, typed annotations, multiline expressions, static 
-initialization, class scopes, and edge cases. It also updates 
-scene metadata with unique IDs and removes redundant load_steps 
-entries from the default environment and scene files.
+This change adds a corpus of sample GDScript files for coverage testing, covering autoloads, coroutine awaits, control flow, 
+lambdas, typed annotations, multiline expressions, static initialization, class scopes, and edge cases. It also updates 
+scene metadata with unique IDs and removes redundant load_steps entries from the default environment and scene files.
 
 ---
 
@@ -77,13 +74,6 @@ Adds a locked, UID-backed GDScript **coverage corpus** of representative fixture
 | CI     | `.github/workflows/*`, `.yamllint.yaml`, `.markdownlint-cli2.yaml`     |
 | Docs   | Milestone 1 Part 1, seed-corpus spec, instrumentation contract, README |
 
-### Review & quality tooling
-
-- **@sourcery-ai** – PR summary + Reviewer’s Guide; initial approval (later withdrawn after extra pushes / rate limits)
-- **@coderabbitai** – PR summary + reviews + GUT test-generation commits
-- **@deepsource-io** / **@codecov** – part of the intended quality stack (no dedicated comments observed on this PR timeline)
-- **@dependabot** – standard dependency bot (no direct activity on this PR)
-
 ### Status
 
 Addresses the objectives of issue #3 (corpus directory, 11 locked sources matching Seed Corpus Specification v1.4, Unix line endings). Ready for continued review after CI and bot feedback iteration.
@@ -92,10 +82,8 @@ Addresses the objectives of issue #3 (corpus directory, 11 locked sources matchi
 
 ## Reviewer's Guide
 
-This PR adds a broad, UID-backed GDScript coverage corpus with 
-runtime and resource-integrity tests, while also establishing 
-reusable lint/test CI workflows and path-aware pull-request 
-validation.
+This PR adds a broad, UID-backed GDScript coverage corpus with runtime and resource-integrity tests, while also establishing 
+reusable lint/test CI workflows and path-aware pull-request validation.
 
 ### File-Level Changes
 

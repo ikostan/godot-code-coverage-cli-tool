@@ -1,12 +1,9 @@
 # Publish Contract v1.4 and Seed Corpus Spec v1.5
 <!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
-This change defines how the seed corpus is laid out on disk and how
-per-entry configuration is recorded, and publishes both as an
-amendment to Contract §13 (Instrumentation Contract v1.4) and the
-Seed Corpus Specification (v1.5). It splits `edge_cases.gd` into two
-entries, takes the corpus from 11 to 12 entries, and changes no code
-and moves no files.
+This change defines how the seed corpus is laid out on disk and how per-entry configuration is recorded, and publishes both as an
+amendment to Contract §13 (Instrumentation Contract v1.4) and the Seed Corpus Specification (v1.5). It splits `edge_cases.gd` into two
+entries, takes the corpus from 11 to 12 entries, and changes no code and moves no files.
 
 ---
 
@@ -68,22 +65,6 @@ Settles the on-disk corpus layout that every remaining golden-artifact task in E
 | Spec     | `docs/seed-corpus-specification-v1.4.md` → `docs/seed-corpus-specification-v1.5.md`       |
 | Docs     | `Readme.md`                                                                               |
 
-### Commits
-
-| Commit    | Author   | Message                                                |
-|-----------|----------|--------------------------------------------------------|
-| `bf15e75` | @claude (Opus 5.5), committed as @ikostan | Publish Contract v1.4 and Seed Corpus Spec v1.5 (#37) |
-| `0a6c7b6` | @ikostan | Align seed corpus table formatting                     |
-| `4df8f06` | @ikostan | Clarify v1.4 corpus exercise artifacts                 |
-
-### Review & quality tooling
-
-- **@sourcery-ai** – Summary by Sourcery, Reviewer's Guide with assessment against #37; **approved** on `bf15e75`.
-- **@coderabbitai** – Summary by CodeRabbit; one actionable review comment (`exercise.gd` required vs. optional), acknowledged the fix and recorded a repository learning; later hit the free OSS review limit.
-- **@claude (Opus 5.5)** – drafted the amendment, the initial commit, and the `exercise.gd` / `contract_version` follow-up fix.
-- **@deepsource-io** / **@codecov** – part of the intended quality stack (no activity observed on this PR).
-- **@dependabot** – standard dependency bot (no direct activity on this PR).
-
 ### CI
 
 - Markdown Lint: ✅ on `bf15e75` and `4df8f06`.
@@ -109,12 +90,9 @@ Merged. Addresses the objectives of issue #37 with one gap (see *Follow-ups*). U
 
 ## Reviewer's Guide
 
-This PR publishes Contract v1.4 and Seed Corpus Specification v1.5,
-formalizing the per-entry directory/artifact layout and per-entry
-`config.json` overrides, splitting the edge-case entry in two,
-updating acceptance criteria for 12 entries, and refreshing README
-version references. No source content or instrumentation semantics
-change.
+This PR publishes Contract v1.4 and Seed Corpus Specification v1.5, formalizing the per-entry directory/artifact layout and per-entry
+`config.json` overrides, splitting the edge-case entry in two, updating acceptance criteria for 12 entries, and refreshing README
+version references. No source content or instrumentation semantics change.
 
 ### File-Level Changes
 
