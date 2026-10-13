@@ -1,0 +1,20 @@
+{
+  "contract_version": "1.4",
+  "line_mappings": [
+    {"original_line": 1, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 2, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 3, "classification": "executable", "hit_record_inserted": true},
+    {"original_line": 4, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 5, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 6, "classification": "executable", "hit_record_inserted": true},
+    {"original_line": 7, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 8, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 9, "classification": "executable", "hit_record_inserted": true}
+  ],
+  "executable_lines": [3, 6, 9],
+  "skipped_lines": [1, 2, 4, 5, 7, 8],
+  "functions": [
+    {"name": "_static_init", "start_line": 5, "end_line": 6, "class_scope": "", "is_static": true},
+    {"name": "get_counter", "start_line": 8, "end_line": 9, "class_scope": "", "is_static": false}
+  ]
+}

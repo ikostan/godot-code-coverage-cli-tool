@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.4",
+  "line_mappings": [
+    {"original_line": 1, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 2, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 3, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 4, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 5, "classification": "executable", "hit_record_inserted": true},
+    {"original_line": 6, "classification": "executable", "hit_record_inserted": true},
+    {"original_line": 7, "classification": "executable", "hit_record_inserted": true}
+  ],
+  "executable_lines": [5, 6, 7],
+  "skipped_lines": [1, 2, 3, 4],
+  "functions": [
+    {"name": "run", "start_line": 3, "end_line": 7, "class_scope": "", "is_static": false}
+  ]
+}
