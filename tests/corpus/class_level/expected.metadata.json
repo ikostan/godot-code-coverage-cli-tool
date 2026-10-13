@@ -1,0 +1,21 @@
+{
+  "contract_version": "1.4",
+  "line_mappings": [
+    {"original_line": 1, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 2, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 3, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 4, "classification": "executable", "hit_record_inserted": true},
+    {"original_line": 5, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 6, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 7, "classification": "executable", "hit_record_inserted": true},
+    {"original_line": 8, "classification": "non_executable", "hit_record_inserted": false},
+    {"original_line": 9, "classification": "structural", "hit_record_inserted": false},
+    {"original_line": 10, "classification": "executable", "hit_record_inserted": true}
+  ],
+  "executable_lines": [4, 7, 10],
+  "skipped_lines": [1, 2, 3, 5, 6, 8, 9],
+  "functions": [
+    {"name": "get_value", "start_line": 6, "end_line": 7, "class_scope": "Inner", "is_static": false},
+    {"name": "make", "start_line": 9, "end_line": 10, "class_scope": "", "is_static": false}
+  ]
+}

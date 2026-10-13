@@ -79,14 +79,6 @@ It also carries the PR #39 milestone summary (Part 2), which was written after #
 | Repo   | `.gitattributes` (new), `.gdcheckignore`                                                                |
 | Docs   | `docs/corpus-golden-gd-verification.md`, Milestone 1 Part 2                                             |
 
-### Review & quality tooling
-
-- **@sourcery-ai** – Summary by Sourcery and Reviewer's Guide with flow diagram and assessment against #38; review run skipped (weekly review budget reached).
-- **@coderabbitai** – no review posted; free OSS review limit reached.
-- **@claude (Opus 5.5)** – implemented both #38 commits and the golden-verification record, and verified everything on headless Godot 4.7.1.
-- **@deepsource-io** / **@codecov** – part of the intended quality stack (no activity observed on this PR).
-- **@dependabot** – standard dependency bot (no direct activity on this PR).
-
 ### CI
 
 On `a6e73df`:
