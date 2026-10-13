@@ -113,12 +113,16 @@ jobs:
               - '**/*.yaml'
             json:
               - '**/*.json'
-              # The linter and its workflow: a PR that only edits these
-              # must still run them, or a broken linter merges untested.
+              # The linter, its workflow, and the orchestrator that wires it
+              # in: a PR that only edits these must still run JSON lint, or
+              # a broken linter or broken wiring merges untested.
               - 'workspace/json_lint.py'
               - '.github/workflows/jsonlint.yml'
+              - '.github/workflows/lint_test_on_pull.yml'
             gut_workflow:
               - '.github/workflows/gut_tests.yml'
+              # Orchestrator edits can break gut_tests' needs/if wiring.
+              - '.github/workflows/lint_test_on_pull.yml'
 
 
   # NOTE: jobs below call a reusable workflow via `uses:`. That job shape does not support
