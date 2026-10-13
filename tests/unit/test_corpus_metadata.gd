@@ -116,7 +116,10 @@ func test_line_mappings_cover_every_line_in_order(entry = use_parameters(SUCCESS
 	for i in mappings.size():
 		var mapping: Dictionary = mappings[i]
 		assert_eq_deep(_sorted_keys(mapping), _sorted(MAPPING_KEYS))
-		assert_eq(int(mapping.get("original_line", 0)), i + 1, "%s mapping #%d" % [entry, i])
+		var line = mapping.get("original_line")
+		var label = "%s mapping #%d original_line" % [entry, i]
+		if _assert_line_number(line, label):
+			assert_eq(int(line), i + 1, label)
 
 
 func test_classifications_match_spec(entry = use_parameters(SUCCESS_ENTRIES)) -> void:
@@ -306,6 +309,12 @@ func _normalized_functions(functions) -> Array:
 		return result
 	for function in functions:
 		assert_eq_deep(_sorted_keys(function), _sorted(FUNCTION_KEYS))
+		var label = "function %s" % function.get("name")
+		assert_eq(typeof(function.get("name")), TYPE_STRING, label + ": name type")
+		assert_eq(typeof(function.get("class_scope")), TYPE_STRING, label + ": class_scope type")
+		assert_eq(typeof(function.get("is_static")), TYPE_BOOL, label + ": is_static type")
+		_assert_line_number(function.get("start_line"), label + ": start_line")
+		_assert_line_number(function.get("end_line"), label + ": end_line")
 		(
 			result
 			. append(
@@ -325,12 +334,20 @@ func _indent(line: String) -> int:
 	return line.length() - line.lstrip("\t").length()
 
 
-# JSON numbers parse as float; goldens must hold whole numbers only.
+# Godot parses every JSON number as a float. A line number must be a JSON
+# number holding a whole value >= 1, never a string or a fraction that int()
+# would silently coerce into a valid-looking line.
+func _assert_line_number(value, label: String) -> bool:
+	var valid = typeof(value) == TYPE_FLOAT and value == floorf(value) and value >= 1.0
+	assert_true(valid, "%s: %s is not a whole line number >= 1" % [label, var_to_str(value)])
+	return valid
+
+
 func _ints(values: Array) -> Array:
 	var result = []
 	for value in values:
-		assert_eq(value, floorf(value), "non-integer line number %s" % value)
-		result.append(int(value))
+		if _assert_line_number(value, "line list entry"):
+			result.append(int(value))
 	return result
 
 
