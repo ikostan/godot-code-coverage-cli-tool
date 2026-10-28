@@ -9,7 +9,7 @@
 
 ## What this is becoming
 
-The legacy tool worked by instrumenting scripts at runtime: a `Coverage` singleton hooked into the live `SceneTree`, monitored node instantiation, and reloaded scripts in place to inject hit-tracking code. That approach required a running Godot process, GUT/GdUnit4 test-runner hooks, and tight coupling to scene-tree state.
+The legacy tool worked by instrumenting scripts at runtime: a `Coverage` singleton hooked into the live `SceneTree`, monitored node instantiation, and reloaded scripts in place to inject hit-tracking code. That approach required a running Godot process, GUT test-runner hooks, and tight coupling to scene-tree state.
 
 This project is moving to a different model: a **pure function** that takes GDScript source text in, and returns instrumented source text (or an explicit error) out — with zero dependency on `SceneTree`, autoloads, test runners, or any runtime coverage state. It can be run standalone from the command line against any `.gd` file, independent of whether a Godot project is even running. Ultimately, this enables seamless CI/CD integration (e.g., GitHub Actions, Codecov) to generate standard LCOV/HTML reports for pull request checks.
 
@@ -53,7 +53,7 @@ The Instrumentation Contract v1.4 and Seed Corpus Specification v1.5 are locked 
 * [ ] Implement Runtime Hit Collector + Coverage Data Model
 * [ ] Implement LCOV Writer
 * [ ] Implement CLI Orchestrator
-* [ ] Add test-runner adapters (GUT / GdUnit4)
+* [ ] Add GUT test-runner integration (GUT is the only supported test runner)
 
 **Current focus:** materializing the seed corpus and implementing the pure Analyzer + Transformer against it.
 
