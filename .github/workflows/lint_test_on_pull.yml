@@ -45,13 +45,12 @@ jobs:
       # doesn't touch any .gd/test/py path, so gdscript/python_tests stay false
       # and the job that runs *that* workflow gets skipped untested.
       gut_workflow: "${{ steps.filter.outputs.gut_workflow }}"
-      # NOTE: gdunit4_workflow / browser_workflow outputs were removed here.
-      # Neither addons/gdunit4 tests nor a browser-test workflow exist in this
-      # pipeline yet, and no job below consumed them. Re-add both the output
-      # line and a matching `filters:` entry together if/when those workflows
-      # are introduced -- a dangling output with no filter behind it silently
-      # resolves to an empty string rather than erroring, which is worse than
-      # just not having it.
+      # NOTE: a browser_workflow output was removed here. No browser-test
+      # workflow exists in this pipeline yet, and no job below consumed it.
+      # Re-add the output line and a matching `filters:` entry together
+      # if/when that workflow is introduced -- a dangling output with no
+      # filter behind it silently resolves to an empty string rather than
+      # erroring, which is worse than just not having it.
     steps:
       - name: "Checkout Code"
         uses: "actions/checkout@v7.0.1"

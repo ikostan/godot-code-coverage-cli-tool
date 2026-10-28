@@ -28,7 +28,7 @@ It must have **no dependency** on:
 
 - `SceneTree`
 - Autoloads
-- Test runners (GUT, GdUnit4, etc.)
+- Test runners (including GUT)
 - Runtime coverage state
 - Any Coverage singleton
 
