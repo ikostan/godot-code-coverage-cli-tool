@@ -1,12 +1,20 @@
-# Seed Corpus Specification v1.5
+# Seed Corpus Specification v1.6
 
 <!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 *(Final – ready for materialization)*
 
-**Matches**: Instrumentation Contract v1.4
+**Matches**: Instrumentation Contract v1.5
 
-**Changes from v1.4**:
+**Changes from v1.5**:
+
+- Sub-case A (`edge_cases_unsupported_syntax.gd`) fails through the bracket-continuation refusal (Contract v1.5 §4.1), and its `expected.error.json` golden is recorded.
+- *General classification rules* state the defaults the goldens already follow, including the lambda-definition precedence and annotations on a `var` line.
+- *FunctionMetadata rules*: `end_line` is defined precisely.
+- `exercise.gd` added to *Corpus layout* as conditional until #23 decides, matching Contract §13.
+- All source blocks and line numbers are unchanged byte for byte.
+
+**Changes from v1.4 (in v1.5)**:
 
 - Per-entry directory layout and the `config.json` rule (see *Corpus layout*), matching Contract v1.4 §13.
 - The corpus default configuration is stated as the `config.json` baseline, including where it differs from the Contract §3 defaults.
@@ -49,11 +57,12 @@ tests/corpus/
     expected.metadata.json     # success entries
     expected_hits.json         # success entries
     expected.error.json        # expected-failure entries
+    exercise.gd                # success entries, only if #23 chooses per-entry scripts
 ```
 
 - **Directory name**: the entry's source filename in this document without `.gd` (e.g. `basic_statements/` for `basic_statements.gd`).
 - **`.uid` sidecar**: `source.gd` keeps its Godot `.uid` sidecar beside it (`source.gd.uid`).
-- **Exercise mechanism**: whether success entries carry an `exercise.gd` (Contract §13.1) or are exercised by the GUT integration suite is decided by the runtime Hit Collector design task (#23). This layout accommodates either.
+- **Exercise mechanism**: whether success entries carry an `exercise.gd` (Contract §13.1) or are exercised by the GUT integration suite is decided by the runtime Hit Collector design task (#23). This layout accommodates either. Until #23 decides, `exercise.gd` is **conditional**: it is neither required nor forbidden, and corpus completeness checks do not test for it.
 
 | #  | Entry                              | Directory                        | Pipeline         | `config.json` |
 |----|------------------------------------|----------------------------------|------------------|---------------|
@@ -89,9 +98,16 @@ The corpus defaults differ from the Contract §3 defaults in two fields:
 
 **General classification rules**
 
+- `extends` → `structural`
+- Blank lines and comment lines → `non_executable`
+- Every `func` / `static func` / `class` header → `structural`
 - Declaration **with initializer** → `executable`
 - Bare declaration **without initializer** → `non_executable`
 - Lambda **definition line** → `structural`; lambda **body lines** → `executable`
+- **Precedence**: a lambda definition line is `structural` even when it is also a declaration with an initializer (`var f = func(...):`, `lambdas.gd` line 4).
+- An annotation on the same line as `var` follows the declaration rule (`@onready var label: Label = $Label` → `executable`).
+
+Constructs that no entry contains have the fixed outcomes of Contract v1.5 §4.1 and §4.2.
 
 **FunctionMetadata rules**
 
@@ -99,7 +115,8 @@ The corpus defaults differ from the Contract §3 defaults in two fields:
 - Anonymous lambdas are omitted.
 - `class_scope` = nearest enclosing class name, or `""` for top-level.
 - `is_static` = `true` only for functions declared `static`.
-- `start_line` / `end_line` = original header line and last body line.
+- `start_line` = original header line.
+- `end_line` = the last physical line inside the function's scope that is neither blank nor a comment, including continuation lines and nested lambda bodies.
 
 ---
 
@@ -519,11 +536,19 @@ func broken(v: int) -> int:
 
 **Failure mechanism (named)**:
 
-The analyzer's indentation-based block tracker cannot distinguish the dedent that closes the lambda body from the dedent that closes the enclosing ternary's parenthetical continuation, because both the lambda's final statement and the `.call()` that terminates the outer expression occur in a way that leaves the indentation state machine unable to decide whether it is still inside the lambda or has returned to the ternary. A purely line-oriented stateful analyzer without a full expression parser has no reliable way to resolve this ambiguity and must therefore refuse to transform the file.
+Bracket continuation (Contract v1.5 §4.1). Line 4 opens a `(` that is still open at the end of the line, because the lambda inside it continues on lines 5–6 and the bracket closes only on line 6. After string literals and comments are stripped, bracket depth is nonzero at the end of the logical line, so the block tracker refuses the file instead of guessing where the lambda body ends.
 
-> **Note for future revision**: If bracket-continuation support (see `bracket_continuation.gd` stretch entry) is later implemented with an independent paren-depth counter, this construct's unclassifiability should be re-validated — a more sophisticated tracker might resolve it correctly, in which case this sub-case would need a replacement construct.
+> **Note for future revision**: Once bracket continuation is implemented (see the `bracket_continuation.gd` stretch entry), this sub-case no longer fails and needs a replacement construct.
 
-`expected.error.json` asserts `UNSUPPORTED_SYNTAX` at the line containing the nested lambda definition (exact line number fixed when the file is written).
+`expected.error.json` (committed in #5):
+
+```json
+{
+  "status": "UNSUPPORTED_SYNTAX",
+  "original_line": 4,
+  "reason": "bracket continuation is not supported"
+}
+```
 
 ---
 
@@ -577,7 +602,7 @@ The analyzer's indentation-based block tracker cannot distinguish the dedent tha
 
 ### Acceptance Criteria
 
-- `tests/corpus/` contains exactly the 12 entry directories listed under *Corpus layout*, each holding the artifacts its pipeline requires.
+- `tests/corpus/` contains exactly the 12 entry directories listed under *Corpus layout*, each holding the artifacts its pipeline requires (`exercise.gd` excluded until #23 decides).
 - All 12 required entries pass their declared pipeline.
 - `config.json` exists only in `disabled_instrumentation/` and `edge_cases_invalid_config/`, and contains only the keys listed for those entries above.
 - Every classification decision is unconditional and baked into the golden metadata.

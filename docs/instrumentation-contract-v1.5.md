@@ -1,13 +1,14 @@
-# Instrumentation Contract v1.4
+# Instrumentation Contract v1.5
 
 <!-- markdownlint-disable MD001 MD036 MD013 MD033 table-column-style -->
 
 *(Godot 4.x CLI Code Coverage Tool – Pure Source Instrumentor)*
 
 **Status**: Fully Implementation-Locked
-**Contract Version**: `1.4`
-**Date**: 2026-10-11
-**Changes from v1.2**: Golden-test artifact structure only (§13): one directory per corpus entry, and an optional `config.json` artifact for per-entry configuration overrides. No change to classification, mapping, metadata meaning, or error semantics. See §14.1.
+**Contract Version**: `1.5`
+**Date**: 2026-11-19
+**Changes from v1.4**: Bracket-continuation refusal (§4.1), fixed outcomes for constructs outside the seed corpus (§4.2), `emit_function_metadata = false` (§3.4, §7), validation order and pinned `reason` strings for `hit_recorder_expression` (§3.3), error precedence (§8), and the final-newline rule for line splitting (§9.1). See §14.1.
+**Changes from v1.2 (in v1.4)**: Golden-test artifact structure only (§13): one directory per corpus entry, and an optional `config.json` artifact for per-entry configuration overrides. No change to classification, mapping, metadata meaning, or error semantics. See §14.1.
 **Changes from v1.1 (in v1.2)**: Resolved remaining ambiguities in disabled-instrumentation behaviour, template validation ordering, and `{path}` substitution safety.
 
 ---
@@ -112,9 +113,26 @@ CoverageCollector.record("{path}", {line})
 **Validation rules**
 
 - The template is always validated, even when `enable_instrumentation = false`.
-- An empty template or a template containing unknown placeholders produces `INVALID_CONFIGURATION`.
+- Configuration is validated before any source line is analysed. A configuration error therefore always has `original_line = -1` and takes precedence over any error in the source (§8).
+- The checks below run in this order, and the first failure is returned. Each failure is `INVALID_CONFIGURATION` with `original_line = -1`, `script_path` set from the request, and this `reason`:
+
+| Order | Check                                        | `reason`                                                  |
+|-------|----------------------------------------------|-----------------------------------------------------------|
+| 1     | Template is empty                            | `hit_recorder_expression is empty`                        |
+| 2     | Template contains an unknown placeholder     | `unknown placeholder {<name>} in hit_recorder_expression` |
+| 3     | Template does not contain `{line}`           | `hit_recorder_expression must contain {line}`             |
+
+- For check 2, `<name>` is the first unknown placeholder in template order.
+- A template without `{line}` would record every hit without identifying its line, so it is rejected (fail-closed, §1, §15). `{path}` stays optional.
 - Substitution is simple textual replacement with **no escaping**.
 - If a pathological `script_path` (containing quotes, newlines, etc.) produces syntactically invalid GDScript after substitution, that is the caller's responsibility. The instrumentor does not attempt to escape or sanitise `{path}`.
+
+#### 3.4 `emit_function_metadata`
+
+- `true` → `functions` lists the named functions and methods of the source (§7).
+- `false` → function metadata extraction is bypassed, and `functions` is an empty array.
+
+The `functions` field is always present in a successful `InstrumentationResult`, whatever this flag's value.
 
 ---
 
@@ -129,6 +147,41 @@ Every original source line receives **exactly one** of the following classificat
 | `structural`     | Required for syntactic structure but is not itself an independently coverable statement.                |
 
 > `structural` does **not** mean "uncovered". It means the line itself is not assigned a normal line-hit obligation.
+
+The classification of the constructs used in the seed corpus is fixed by the Seed Corpus Specification (*General classification rules*). §4.1 and §4.2 fix the outcome of the constructs it does not contain.
+
+#### 4.1 Bracket continuation
+
+After string literals and comments are stripped, if bracket depth (`()`, `[]`, `{}`) is nonzero at the end of a logical line, the instrumentor returns `UNSUPPORTED_SYNTAX` with:
+
+- `original_line`: the line where the outermost unclosed bracket opened
+- `reason`: `bracket continuation is not supported`
+
+This applies regardless of `enable_instrumentation`. Backslash (`\`) continuation remains supported. Bracket continuation is deferred to the Seed Corpus Specification's `bracket_continuation.gd` stretch entry.
+
+#### 4.2 Constructs outside the seed corpus
+
+Each construct below has a fixed outcome. An implementation must not decide one of its own.
+
+| Construct                                                              | Outcome                                             |
+|------------------------------------------------------------------------|-----------------------------------------------------|
+| `for` / `while` header                                                 | `structural` (like `if`)                            |
+| `match` and its pattern lines                                          | `UNSUPPORTED_SYNTAX` (`match_patterns.gd` stretch)  |
+| `break`, `continue`, `pass`, `return`                                  | `executable`                                        |
+| `signal` declaration                                                   | `non_executable`                                    |
+| `const` declaration                                                    | `non_executable` (compile-time)                     |
+| single-line `enum`                                                     | `non_executable`                                    |
+| `class_name`, `@tool`, annotation on its own line                      | `structural`                                        |
+| property with `get` / `set` accessors                                  | `UNSUPPORTED_SYNTAX`                                |
+| compound statement on one line, including a lambda whose body is on its header line (`func f(): return 1`, `if x: return`, `arr.map(func(x): return x * 2)`) | `UNSUPPORTED_SYNTAX` (one line hit cannot show whether the lambda body ran) |
+| triple-quoted multi-line string                                        | `UNSUPPORTED_SYNTAX`                                |
+
+Malformed source returns `INVALID_SOURCE`:
+
+- mixed tab/space indentation
+- a dedent that matches no open block
+- an unterminated string literal
+- a closing bracket with no opener
 
 ---
 
@@ -190,14 +243,14 @@ Preserving "error / exception behaviour" (§11) refers to semantic behaviour onl
 class_name InstrumentationResult
 extends RefCounted
 
-var contract_version: String = "1.4"
+var contract_version: String = "1.5"
 var script_path: String
 var original_source: String
 var instrumented_source: String
 var line_mappings: Array[LineMapping]
 var executable_lines: Array[int]      # Original line numbers classified as executable
 var skipped_lines: Array[int]         # Intentionally non-instrumented lines only
-var functions: Array[FunctionMetadata] # Optional
+var functions: Array[FunctionMetadata] # Always present; empty when emit_function_metadata = false (§3.4)
 ```
 
 ```gdscript
@@ -239,6 +292,14 @@ enum InstrumentationStatus {
 }
 ```
 
+**Error precedence.** A failed transformation returns exactly one error. When the source and configuration contain several, the error returned is chosen in this order:
+
+1. Configuration errors (§3.3). Configuration is validated before any source line is analysed, so these always have `original_line = -1`.
+2. Block-tracker errors: bracket continuation (§4.1), triple-quoted multi-line strings, one-line compound statements (§4.2), and `INVALID_SOURCE` (§4.2).
+3. Classification errors: `match` and properties with `get` / `set` accessors (§4.2).
+
+A block-tracker error is returned even when a classification error is on an earlier line. Within each stage, the error with the lowest `original_line` is returned.
+
 ---
 
 ### 9. Determinism Requirements
@@ -250,6 +311,8 @@ It must not depend on execution order, SceneTree state, filesystem enumeration o
 #### 9.1 Line endings
 
 The instrumentor treats the source as a sequence of lines split on `\n`. A trailing `\r` (CRLF) is stripped from each line before classification and is **not** re-inserted into the instrumented source. The instrumented source is always emitted with Unix line endings (`\n` only). This rule is mandatory for determinism of golden files.
+
+A final `\n` terminates the last line; it does not start an empty one. For example, `"extends Node\n"` is one line, not two.
 
 ---
 
@@ -380,12 +443,23 @@ The corpus defaults differ from the Contract §3 defaults in two fields:
 
 ### 14. Versioning
 
-- Document version: **1.4**
-- Every successful `InstrumentationResult` exposes `contract_version = "1.4"`.
+- Document version: **1.5**
+- Every successful `InstrumentationResult` exposes `contract_version = "1.5"`.
 - Any change to classification, mapping, metadata meaning, unsupported-syntax behaviour, or instrumentation guarantees requires a new contract version.
 - Any change to golden-test artifact structure (§13) also requires a new contract version.
 
 #### 14.1 Version notes
+
+**v1.5** — unsupported-syntax behaviour, classification of constructs outside the seed corpus, and configuration validation:
+
+- §3.3: configuration is validated before any source line; checks run in a fixed order (empty, unknown placeholder, missing `{line}`) with pinned `reason` strings. A template without `{line}` is now rejected.
+- §3.4, §7: with `emit_function_metadata = false`, `functions` is an empty array; the field is always present.
+- §4.1: bracket continuation returns `UNSUPPORTED_SYNTAX`; backslash continuation remains supported.
+- §4.2: fixed outcomes for constructs outside the seed corpus, and the malformed-source cases that return `INVALID_SOURCE`.
+- §8: error precedence (configuration, then block tracker, then classification; lowest `original_line` within a stage).
+- §9.1: a final `\n` does not start an empty line.
+
+v1.5 is a behaviour change (§14): an instrumentor that satisfies v1.4 does not necessarily satisfy v1.5. The seed corpus sources and their line numbers are unchanged.
 
 **v1.4** — golden-test artifact structure only:
 
@@ -405,6 +479,6 @@ This principle is non-negotiable.
 
 ---
 
-**End of Instrumentation Contract v1.4**
+**End of Instrumentation Contract v1.5**
 
 <!-- markdownlint-enable MD001 MD036 MD013 MD033 table-column-style -->
